@@ -24,9 +24,7 @@ export default {
     };
   },
   mounted() {
-    this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
-      console.log('onPlayerReady', this);
-    });
+    this.player = videojs(this.$refs.videoPlayer, this.options);
   },
   beforeDestroy() {
     if (this.player) {
@@ -35,9 +33,6 @@ export default {
   },
   watch: {
     options(newOptions, oldOptions) {
-      // this.player = videojs(this.$refs.videoPlayer, newOptions, function onPlayerReady() {
-      //   console.log('onPlayerReady', this);
-      // });
       this.player.src(newOptions.sources[0]);
     }
   }

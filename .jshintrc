@@ -4,6 +4,7 @@
   "esversion": 6,
   "globals": {
     "process": true,
-    "require": true
+    "require": true,
+    "window": true
   }
 }

@@ -1,14 +1,17 @@
 {
   "name": "video-visualisation-editor",
   "version": "0.1.0",
-  "description": "video editor with visualisations of video content and features",
   "private": true,
+  "description": "video editor with visualisations of video content and features",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "dev": "sleep 5 && NODE_ENV=DEV electron app.js & NODE_ENV=DEV vue-cli-service serve"
+    "dev": "sleep 5 && NODE_ENV=DEV electron app.js & NODE_ENV=DEV vue-cli-service serve",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve"
   },
+  "main": "background.js",
   "dependencies": {
     "core-js": "^2.6.5",
     "electron": "^5.0.6",
@@ -19,6 +22,8 @@
     "@vue/cli-plugin-babel": "^3.8.0",
     "@vue/cli-plugin-eslint": "^3.8.0",
     "@vue/cli-service": "^3.8.0",
+    "electron": "^5.0.0",
+    "vue-cli-plugin-electron-builder": "^1.3.6",
     "vue-template-compiler": "^2.6.10"
   },
   "eslintConfig": {
