@@ -2,6 +2,7 @@
 
 import { app, globalShortcut, ipcMain, protocol, BrowserWindow, Menu } from 'electron';
 import { createProtocol, installVueDevtools } from 'vue-cli-plugin-electron-builder/lib';
+import { spawn } from 'child_process';
 const isDev = process.env.NODE_ENV !== 'production';
 
 // Global reference so object is not garbage collected.

@@ -1,0 +1,1 @@
+print('Called from JS')
