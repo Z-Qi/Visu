@@ -18,11 +18,15 @@
     <div>
       <button @click="python">Call Python</button>
     </div>
+    <div>
+      <button @click="yolo">Run yolo</button>
+    </div>
   </div>
 </template>
 
 <script>
 import VideoContainer from '../components/VideoContainer';
+import { detectObjects } from '../feature_detection/yolo'
 import { spawn } from 'child_process';
 const { app, ipcRenderer } = window.require('electron');
 
@@ -70,6 +74,10 @@ export default {
       python.stderr.on('data', data => {
         console.log('Python: ' + data);
       });
+    },
+    async yolo() {
+      let objects = await detectObjects(this.filePath, '1/50');
+      console.log(objects);
     }
   }
 };
