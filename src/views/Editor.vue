@@ -1,38 +1,91 @@
 <template>
-  <div>
-    <div>
-      <header>
-        <h1>Video Editor</h1>
-      </header>
-    </div>
+  <div class="full-height">
+    <b-container fluid class="full-height">
+      <b-row align-v="start">
+        <b-col>
+          <header class="header">
+            <h1>Video Editor</h1>
+          </header>
+        </b-col>
+      </b-row>
 
-    <div>
-      <video-container :path="filePath" :options="videoOptions"></video-container>
-    </div>
+      <b-row class="main-content" no-gutters>
+        <b-col>
+          <video-container :path="filePath" :options="videoOptions"></video-container>
 
-    <div>
-      <label for="videoFile">Open Video</label>
-      <input id="videoFile" type="file" ref="videoInput" accept="video/*" @change="loadVideo" style="display: none" />
-    </div>
+          <div>
+            <label for="videoFile">Open Video</label>
+            <input
+              id="videoFile"
+              type="file"
+              ref="videoInput"
+              accept="video/*"
+              @change="loadVideo"
+              style="display: none"
+            />
+          </div>
+        </b-col>
 
-    <div>
-      <button @click="python">Call Python</button>
-    </div>
-    <div>
-      <button @click="yolo">Run yolo</button>
-    </div>
+        <b-col data-simplebar class="scrollable">
+          <video-feature-container></video-feature-container>
+        </b-col>
+      </b-row>
+
+      <b-row align-v="end">
+        <b-col>
+          <button @click="python">Call Python</button>
+        </b-col>
+        <b-col>
+          <button @click="yolo">Run yolo</button>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
+<style scoped>
+.full-height {
+  height: 100%;
+}
+
+.header {
+  max-height: 15%;
+  margin: 50px 0px 0px 0px;
+}
+
+.main-content {
+  height: 70%;
+  margin: 50px 0px;
+}
+
+.footer {
+  max-height: 15%;
+}
+
+.scrollable {
+  height: 100%;
+  overflow-x: auto;
+}
+</style>
+
 <script>
 import VideoContainer from '../components/VideoContainer';
-import { detectObjects } from '../feature_detection/yolo'
+import VideoFeatureContainer from '../components/VideoFeatureContainer';
+import { BContainer, BRow, BCol } from 'bootstrap-vue';
+import 'simplebar';
+import 'simplebar/dist/simplebar.css'
+
+import { detectObjects } from '../feature_detection/yolo';
 import { spawn } from 'child_process';
 const { app, ipcRenderer } = window.require('electron');
 
 export default {
   components: {
-    VideoContainer
+    VideoContainer,
+    VideoFeatureContainer,
+    BContainer,
+    BRow,
+    BCol
   },
   data() {
     return {

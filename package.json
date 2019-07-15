@@ -12,9 +12,12 @@
   },
   "main": "background.js",
   "dependencies": {
+    "bootstrap": "^4.3.1",
+    "bootstrap-vue": "^2.0.0-rc.26",
     "core-js": "^2.6.5",
     "electron": "^5.0.6",
     "rimraf": "^2.6.3",
+    "simplebar": "^4.1.0",
     "video.js": "^7.5.5",
     "vue": "^2.6.10"
   },
