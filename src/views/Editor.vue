@@ -27,7 +27,7 @@
         </b-col>
 
         <b-col data-simplebar class="scrollable">
-          <video-feature-container></video-feature-container>
+          <video-feature-container :features="features"></video-feature-container>
         </b-col>
       </b-row>
 
@@ -37,6 +37,9 @@
         </b-col>
         <b-col>
           <button @click="yolo">Run yolo</button>
+        </b-col>
+        <b-col>
+          <button @click="keyframes">Show keyframes</button>
         </b-col>
       </b-row>
     </b-container>
@@ -76,7 +79,12 @@ import 'simplebar';
 import 'simplebar/dist/simplebar.css'
 
 import { detectObjects } from '../feature_detection/yolo';
+import { extractKeyframes } from '../feature_detection/keyframes';
 import { spawn } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as url from 'url';
+
 const { app, ipcRenderer } = window.require('electron');
 
 export default {
@@ -91,6 +99,7 @@ export default {
     return {
       files: [],
       filePath: '',
+      features: [],
       videoOptions: {
         autoplay: false,
         controls: true,
@@ -131,6 +140,17 @@ export default {
     async yolo() {
       let objects = await detectObjects(this.filePath, '1/50');
       console.log(objects);
+    },
+    async keyframes() {
+      const keyframeDirectory = await extractKeyframes(this.filePath, 10);
+      const keyframePaths = fs.readdirSync(keyframeDirectory).map(frame => {
+        return {
+          'src': url.pathToFileURL(path.join(keyframeDirectory, frame)).toString(),
+          'timestamp': ''
+        };
+      });
+      console.log(keyframePaths);
+      this.features = keyframePaths;
     }
   }
 };

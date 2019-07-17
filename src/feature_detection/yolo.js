@@ -3,7 +3,7 @@ import * as rimraf from 'rimraf';
 import { spawn } from 'child_process';
 
 export async function detectObjects(path, fps) {
-    const frameDirectory = './.frames/'
+    const frameDirectory = './.frames/';
 
     rimraf.sync(frameDirectory);
     fs.mkdirSync(frameDirectory);
@@ -48,8 +48,7 @@ function generateFrames(path, frameDirectory, fps) {
                 `${frameDirectory}frame%04d.jpg`,
                 '-hide_banner'
             ]
-        )
-
+        );
         ffmpeg.on('exit', (code, signal) => {
             resolve();
         });

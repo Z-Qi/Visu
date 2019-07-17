@@ -2,7 +2,7 @@
   <div>
     <b-container>
       <b-row>
-        <b-col col md="4" v-for="feature in features" :key="feature.timestamp">
+        <b-col col md="4" v-for="feature in features" :key="feature.src">
           <feature-card :src="feature.src" :timestamp="feature.timestamp" />
         </b-col>
       </b-row>

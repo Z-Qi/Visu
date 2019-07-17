@@ -25,3 +25,11 @@ yarn-error.log*
 
 # Weight files
 *.weights
+
+# Binary files
+src/python_scripts/hecate/distribute
+
+# Video files
+*.mp4
+*.avi
+*.mkv
