@@ -77,6 +77,8 @@ subprocess.run(
         f"select='{ffmpeg_frame_str}'",
         '-vsync',
         '0',
-        os.path.join(args.keyframe_dir, 'keyframe%04d.jpg')
+        '-frame_pts',
+        '1',
+        os.path.join(args.keyframe_dir, 'keyframe_%d.jpg')
     ]
 )

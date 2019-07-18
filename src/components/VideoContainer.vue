@@ -71,6 +71,9 @@ export default {
       ffmpeg.stderr.on('data', data => {
         this.framerate = -1;
       });
+    },
+    seek(timestamp) {
+      this.player.currentTime(parseFloat(timestamp));
     }
   }
 };

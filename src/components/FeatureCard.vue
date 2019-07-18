@@ -1,6 +1,6 @@
 <template>
-  <b-card no-body overlay :img-src="src" bg-variant="dark" text-variant="white">
-    <b-card-text>{{ timestamp }}</b-card-text>
+  <b-card no-body :img-src="src" bg-variant="dark" text-variant="white">
+    <b-card-text>{{ timestamp.toFixed(3).replace('.', ':') }}</b-card-text>
   </b-card>
 </template>
 
@@ -14,8 +14,8 @@ export default {
       default: 'N/A'
     },
     timestamp: {
-      type: String,
-      default: '0:00'
+      type: Number,
+      default: 0
     }
   },
   components: {

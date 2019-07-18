@@ -11,7 +11,7 @@
 
       <b-row class="main-content" no-gutters>
         <b-col>
-          <video-container :path="filePath" :options="videoOptions"></video-container>
+          <video-container ref="videoContainer" :path="filePath" :options="videoOptions"></video-container>
 
           <div>
             <label for="videoFile">Open Video</label>
@@ -27,7 +27,7 @@
         </b-col>
 
         <b-col data-simplebar class="scrollable">
-          <video-feature-container :features="features"></video-feature-container>
+          <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container>
         </b-col>
       </b-row>
 
@@ -76,7 +76,7 @@ import VideoContainer from '../components/VideoContainer';
 import VideoFeatureContainer from '../components/VideoFeatureContainer';
 import { BContainer, BRow, BCol } from 'bootstrap-vue';
 import 'simplebar';
-import 'simplebar/dist/simplebar.css'
+import 'simplebar/dist/simplebar.css';
 
 import { detectObjects } from '../feature_detection/yolo';
 import { extractKeyframes } from '../feature_detection/keyframes';
@@ -99,6 +99,7 @@ export default {
     return {
       files: [],
       filePath: '',
+      framerate: 25, //temporary
       features: [],
       videoOptions: {
         autoplay: false,
@@ -126,6 +127,9 @@ export default {
         ]
       });
     },
+    seek(timestamp) {
+      this.$refs.videoContainer.seek(timestamp);
+    },
     python() {
       let python = spawn('python3', ['./src/python_scripts/placeholder_test.py']);
 
@@ -142,15 +146,16 @@ export default {
       console.log(objects);
     },
     async keyframes() {
-      const keyframeDirectory = await extractKeyframes(this.filePath, 10);
+      //changed to 5 for testing on short videos
+      const keyframeDirectory = await extractKeyframes(this.filePath, 5);
       const keyframePaths = fs.readdirSync(keyframeDirectory).map(frame => {
         return {
-          'src': url.pathToFileURL(path.join(keyframeDirectory, frame)).toString(),
-          'timestamp': ''
+          src: url.pathToFileURL(path.join(keyframeDirectory, frame)).toString(),
+          timestamp: parseInt(frame.match(/\d+/)[0]) / this.framerate
         };
       });
       console.log(keyframePaths);
-      this.features = keyframePaths;
+      this.features = keyframePaths.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
     }
   }
 };
