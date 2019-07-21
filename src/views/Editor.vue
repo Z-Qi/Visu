@@ -11,7 +11,12 @@
 
       <b-row class="main-content" no-gutters>
         <b-col>
-          <video-container ref="videoContainer" :path="filePath" :options="videoOptions"></video-container>
+          <video-container
+            ref="videoContainer"
+            :path="filePath"
+            :options="videoOptions"
+            v-on:framerate-updated="updateFramerate"
+          ></video-container>
 
           <div>
             <label for="videoFile">Open Video</label>
@@ -39,7 +44,7 @@
           <button @click="yolo">Run yolo</button>
         </b-col>
         <b-col>
-          <button @click="keyframes">Show keyframes</button>
+          <button v-if="framerate" @click="keyframes">Show keyframes</button>
         </b-col>
       </b-row>
     </b-container>
@@ -99,7 +104,7 @@ export default {
     return {
       files: [],
       filePath: '',
-      framerate: 25, //temporary
+      framerate: 0,
       features: [],
       videoOptions: {
         autoplay: false,
@@ -118,6 +123,7 @@ export default {
     loadVideo() {
       this.files = this.$refs.videoInput.files;
       this.filePath = this.files[0].path;
+      this.features = [];
       this.videoOptions = Object.assign({}, this.videoOptions, {
         sources: [
           {
@@ -126,6 +132,9 @@ export default {
           }
         ]
       });
+    },
+    updateFramerate(framerate) {
+      this.framerate = framerate;
     },
     seek(timestamp) {
       this.$refs.videoContainer.seek(timestamp);
@@ -150,7 +159,7 @@ export default {
       const keyframeDirectory = await extractKeyframes(this.filePath, 5);
       const keyframePaths = fs.readdirSync(keyframeDirectory).map(frame => {
         return {
-          src: url.pathToFileURL(path.join(keyframeDirectory, frame)).toString(),
+          src: url.pathToFileURL(path.join(keyframeDirectory, frame)).toString() + '?time=' + Date.now(),
           timestamp: parseInt(frame.match(/\d+/)[0]) / this.framerate
         };
       });

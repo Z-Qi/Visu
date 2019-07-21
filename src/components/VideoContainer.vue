@@ -66,6 +66,7 @@ export default {
 
       ffmpeg.stdout.on('data', data => {
         this.framerate = Math.round(parseFloat(data));
+        this.$emit('framerate-updated', this.framerate);
       });
 
       ffmpeg.stderr.on('data', data => {
