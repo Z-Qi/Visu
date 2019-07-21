@@ -73,6 +73,19 @@ export default {
         this.framerate = -1;
       });
     },
+    togglePlaying() {
+      if (this.player.paused()) {
+        this.player.play();
+        this.$emit('playing');
+      } else {
+        this.player.pause();
+        this.$emit('paused');
+      }
+    },
+    skipFrames(frames) {
+      let time = this.player.currentTime();
+      this.player.currentTime(time + frames / this.framerate);
+    },
     seek(timestamp) {
       this.player.currentTime(parseFloat(timestamp));
     }

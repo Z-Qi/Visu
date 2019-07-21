@@ -1,7 +1,7 @@
 <template>
   <div class="full-height">
     <b-container fluid class="full-height">
-      <b-row align-v="start">
+      <b-row>
         <b-col>
           <header class="header">
             <h1>Video Editor</h1>
@@ -36,45 +36,24 @@
         </b-col>
       </b-row>
 
-      <b-row align-v="end">
+      <b-row>
         <b-col>
-          <button @click="python">Call Python</button>
+          <button :disabled="framerate == 0" @click="yolo">Run yolo</button>
         </b-col>
         <b-col>
-          <button @click="yolo">Run yolo</button>
+          <button :disabled="framerate == 0" @click="skipFrames(-framerate)">&lt;&lt;</button>
+          <button :disabled="framerate == 0" @click="skipFrames(-1)">&lt;</button>
+          <button :disabled="framerate == 0" @click="togglePlaying">Play/Pause</button>
+          <button :disabled="framerate == 0" @click="skipFrames(1)">&gt;</button>
+          <button :disabled="framerate == 0" @click="skipFrames(framerate)">&gt;&gt;</button>
         </b-col>
         <b-col>
-          <button v-if="framerate" @click="keyframes">Show keyframes</button>
+          <button :disabled="framerate == 0" @click="keyframes">Show keyframes</button>
         </b-col>
       </b-row>
     </b-container>
   </div>
 </template>
-
-<style scoped>
-.full-height {
-  height: 100%;
-}
-
-.header {
-  max-height: 15%;
-  margin: 50px 0px 0px 0px;
-}
-
-.main-content {
-  height: 70%;
-  margin: 50px 0px;
-}
-
-.footer {
-  max-height: 15%;
-}
-
-.scrollable {
-  height: 100%;
-  overflow-x: auto;
-}
-</style>
 
 <script>
 import VideoContainer from '../components/VideoContainer';
@@ -136,19 +115,14 @@ export default {
     updateFramerate(framerate) {
       this.framerate = framerate;
     },
+    togglePlaying() {
+      this.$refs.videoContainer.togglePlaying();
+    },
+    skipFrames(frames) {
+      this.$refs.videoContainer.skipFrames(frames);
+    },
     seek(timestamp) {
       this.$refs.videoContainer.seek(timestamp);
-    },
-    python() {
-      let python = spawn('python3', ['./src/python_scripts/placeholder_test.py']);
-
-      python.stdout.on('data', data => {
-        console.log('Python: ' + data);
-      });
-
-      python.stderr.on('data', data => {
-        console.log('Python: ' + data);
-      });
     },
     async yolo() {
       let objects = await detectObjects(this.filePath, '1/50');
@@ -169,3 +143,28 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.full-height {
+  height: 100%;
+}
+
+.header {
+  max-height: 15%;
+  margin: 50px 0px 0px 0px;
+}
+
+.main-content {
+  height: 70%;
+  margin: 50px 0px;
+}
+
+.footer {
+  max-height: 15%;
+}
+
+.scrollable {
+  height: 100%;
+  overflow-x: auto;
+}
+</style>

@@ -14,12 +14,6 @@
   </div>
 </template>
 
-<style scoped>
-.col {
-  padding-bottom: 10px;
-}
-</style>
-
 <script>
 import FeatureCard from './FeatureCard';
 import { BContainer, BRow, BCol } from 'bootstrap-vue';
@@ -46,3 +40,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.col {
+  padding-bottom: 10px;
+}
+</style>
