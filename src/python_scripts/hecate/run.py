@@ -59,8 +59,15 @@ keyframes = list(
     )
 )
 
-# TODO parse shots
-# shots = list(re.search('(?<=shots: ).+', hecate_result).group().split(','))
+shot_boundaries = list(
+    map(
+        lambda boundary: {'start': boundary[0], 'end': boundary[1]},
+        map(
+            lambda shot: re.sub('[\[\]]', '', shot).split(':'),
+                re.search('(?<=shots: ).+', hecate_result).group().split(',')
+        )
+    )
+)
 
 ffmpeg_frame_str = ''
 for frame in keyframes:
