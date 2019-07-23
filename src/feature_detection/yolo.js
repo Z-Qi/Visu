@@ -13,7 +13,7 @@ export async function detectObjects(path, fps) {
 
     rimraf.sync(frameDirectory);
 
-    return JSON.parse(detectedObjects.toString());
+    return detectedObjects;
 }
 
 function runObjectDetection(frameDirectory) {
@@ -27,7 +27,7 @@ function runObjectDetection(frameDirectory) {
             ]
         );
         python.stdout.on('data', data => {
-            resolve(data);
+            resolve(JSON.parse(data.toString()));
         });
         python.stderr.on('data', data => {
             // yolo prints to stderr

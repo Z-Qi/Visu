@@ -130,15 +130,9 @@ export default {
     },
     async keyframes() {
       //changed to 5 for testing on short videos
-      const keyframeDirectory = await extractKeyframes(this.filePath, 5);
-      const keyframePaths = fs.readdirSync(keyframeDirectory).map(frame => {
-        return {
-          src: url.pathToFileURL(path.join(keyframeDirectory, frame)).toString() + '?time=' + Date.now(),
-          timestamp: parseInt(frame.match(/\d+/)[0]) / this.framerate
-        };
-      });
-      console.log(keyframePaths);
-      this.features = keyframePaths.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+      const extractedKeyframes = await extractKeyframes(this.filePath, 5, this.framerate);
+      console.log(extractedKeyframes);
+      this.features = extractedKeyframes.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
     }
   }
 };

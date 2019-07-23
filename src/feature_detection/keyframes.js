@@ -1,22 +1,26 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as rimraf from 'rimraf';
 import { spawn } from 'child_process';
-import { remote } from 'electron';
 
-export async function extractKeyframes(filePath, step) {
-    const keyframeDirectory = path.join(remote.app.getPath('userData'), '.keyframes/');
+import * as util from './util'
+import Keyframe from './keyframe';
+import * as url from 'url';
 
-    rimraf.sync(keyframeDirectory);
-    fs.mkdirSync(keyframeDirectory);
+export async function extractKeyframes(filePath, step, framerate) {
+    util.removeDirectory(util.KEYFRAME_DIR);
 
-    await runKeyframeExtraction(filePath, step, keyframeDirectory);
+    await runKeyframeExtraction(filePath, step, util.getFullPath(util.KEYFRAME_DIR));
 
-    return keyframeDirectory;
+    const keyframePaths = util.readDirectory(util.KEYFRAME_DIR);
+
+    return keyframePaths.map(path => {
+        return new Keyframe(
+            `${url.pathToFileURL(path)}?time=${Date.now()}`,
+            parseInt(path.match(/\d+/)[0]) / framerate
+        );
+    });
 }
 
 function runKeyframeExtraction(filePath, step, keyframeDirectory) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         let python = spawn(
             'python3',
             [
