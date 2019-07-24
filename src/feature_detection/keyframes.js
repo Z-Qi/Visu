@@ -1,8 +1,8 @@
 import { spawn } from 'child_process';
+import * as url from 'url';
 
 import * as util from './util'
 import Keyframe from './keyframe';
-import * as url from 'url';
 
 export async function extractKeyframes(filePath, step, framerate) {
     util.removeDirectory(util.KEYFRAME_DIR);

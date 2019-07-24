@@ -1,19 +1,23 @@
-import * as fs from 'fs';
-import * as rimraf from 'rimraf';
 import { spawn } from 'child_process';
+import * as url from 'url';
+
+import ObjectFrame from './object_frame';
+import * as util from './util';
 
 export async function detectObjects(path, fps) {
-    const frameDirectory = './.frames/';
+    util.removeDirectory(util.FRAME_DIR);
+    util.createDirectory(util.FRAME_DIR);
 
-    rimraf.sync(frameDirectory);
-    fs.mkdirSync(frameDirectory);
+    // todo: should have the ability to detect objects in keyframes, shots, and the whole video
+    await generateFrames(path, util.getFullPath(util.FRAME_DIR), fps);
+    let detectedObjects = await runObjectDetection(util.getFullPath(util.FRAME_DIR));
 
-    await generateFrames(path, frameDirectory, fps);
-    let detectedObjects = await runObjectDetection(frameDirectory);
-
-    rimraf.sync(frameDirectory);
-
-    return detectedObjects;
+    return detectedObjects.map(o => {
+        return new ObjectFrame(
+            `${url.pathToFileURL(o.path)}?time=${Date.now()}`,
+            o.objects
+        );
+    });
 }
 
 function runObjectDetection(frameDirectory) {

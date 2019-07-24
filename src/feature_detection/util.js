@@ -4,6 +4,7 @@ import * as rimraf from 'rimraf';
 import { remote } from 'electron';
 
 export const KEYFRAME_DIR = '.keyframes/';
+export const FRAME_DIR = '.frames/';
 
 export function createDirectory(directory) {
     fs.mkdirSync(getFullPath(directory));

@@ -32,8 +32,19 @@
         </b-col>
 
         <b-col data-simplebar class="scrollable">
-          <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container>
+          <div>
+            <b-tabs pills card>
+              <b-tab title="Keyframes" active>
+                <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container>
+              </b-tab>
+              <b-tab title="Objects">
+                <detected-objects-container :frames="objectFrames"></detected-objects-container>
+                  <!-- <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container> -->
+              </b-tab>
+            </b-tabs>
+          </div>
         </b-col>
+
       </b-row>
 
       <b-row>
@@ -58,7 +69,8 @@
 <script>
 import VideoContainer from '../components/VideoContainer';
 import VideoFeatureContainer from '../components/VideoFeatureContainer';
-import { BContainer, BRow, BCol } from 'bootstrap-vue';
+import DetectedObjectsContainer from '../components/DetectedObjectsContainer';
+import { BContainer, BRow, BCol, BTabs, BTab } from 'bootstrap-vue';
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 
@@ -75,9 +87,12 @@ export default {
   components: {
     VideoContainer,
     VideoFeatureContainer,
+    DetectedObjectsContainer,
     BContainer,
     BRow,
-    BCol
+    BCol,
+    BTabs,
+    BTab
   },
   data() {
     return {
@@ -85,6 +100,7 @@ export default {
       filePath: '',
       framerate: 0,
       features: [],
+      objectFrames: [],
       videoOptions: {
         autoplay: false,
         controls: true,
@@ -125,8 +141,9 @@ export default {
       this.$refs.videoContainer.seek(timestamp);
     },
     async yolo() {
-      let objects = await detectObjects(this.filePath, '1/50');
+      let objects = await detectObjects(this.filePath, '1');
       console.log(objects);
+      this.objectFrames = objects;
     },
     async keyframes() {
       //changed to 5 for testing on short videos
