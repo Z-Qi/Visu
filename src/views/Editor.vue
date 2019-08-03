@@ -35,16 +35,15 @@
           <div>
             <b-tabs pills card>
               <b-tab title="Keyframes" active>
-                <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container>
+                <video-feature-container :features="features" v-on:frame-selected="seek" />
               </b-tab>
               <b-tab title="Objects">
-                <detected-objects-container :frames="objectFrames"></detected-objects-container>
-                  <!-- <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container> -->
+                <detected-objects-container :frames="objectFrames" />
+                <!-- <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container> -->
               </b-tab>
             </b-tabs>
           </div>
         </b-col>
-
       </b-row>
 
       <b-row>
@@ -75,7 +74,7 @@ import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 
 import { detectObjects } from '../feature_detection/yolo';
-import { extractKeyframes } from '../feature_detection/keyframes';
+import { extractKeyframes, getShotBoundaryInfo } from '../feature_detection/keyframes';
 import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -99,7 +98,7 @@ export default {
       files: [],
       filePath: '',
       framerate: 0,
-      features: [],
+      features: {},
       objectFrames: [],
       videoOptions: {
         autoplay: false,
@@ -118,7 +117,7 @@ export default {
     loadVideo() {
       this.files = this.$refs.videoInput.files;
       this.filePath = this.files[0].path;
-      this.features = [];
+      this.features = {};
       this.videoOptions = Object.assign({}, this.videoOptions, {
         sources: [
           {
@@ -149,7 +148,10 @@ export default {
       //changed to 5 for testing on short videos
       const extractedKeyframes = await extractKeyframes(this.filePath, 5, this.framerate);
       console.log(extractedKeyframes);
-      this.features = extractedKeyframes.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+      this.features = {
+        keyframes: extractedKeyframes.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1)),
+        shotBoundaries: getShotBoundaryInfo().boundaries
+      };
     }
   }
 };

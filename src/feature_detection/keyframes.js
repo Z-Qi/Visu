@@ -1,11 +1,12 @@
 import { spawn } from 'child_process';
 import * as url from 'url';
 
-import * as util from './util'
+import * as util from './util';
 import Keyframe from './keyframe';
 
 export async function extractKeyframes(filePath, step, framerate) {
     util.removeDirectory(util.KEYFRAME_DIR);
+    util.removeDirectory(util.SHOT_DIR);
 
     await runKeyframeExtraction(filePath, step, util.getFullPath(util.KEYFRAME_DIR));
 
@@ -17,6 +18,11 @@ export async function extractKeyframes(filePath, step, framerate) {
             parseInt(path.match(/\d+/)[0]) / framerate
         );
     });
+}
+
+export function getShotBoundaryInfo() {
+    const shotBounds = util.readFile(util.SHOT_DIR, 'shot_boundaries.json');
+    return JSON.parse(shotBounds);
 }
 
 function runKeyframeExtraction(filePath, step, keyframeDirectory) {

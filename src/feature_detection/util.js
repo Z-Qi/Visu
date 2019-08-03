@@ -5,6 +5,7 @@ import { remote } from 'electron';
 
 export const KEYFRAME_DIR = '.keyframes/';
 export const FRAME_DIR = '.frames/';
+export const SHOT_DIR = '.shots/';
 
 export function createDirectory(directory) {
     fs.mkdirSync(getFullPath(directory));
@@ -19,9 +20,15 @@ export function readDirectory(directory) {
     return fs.readdirSync(getFullPath(directory)).map(p => path.join(fullPath, p));
 }
 
-export function getFullPath(directory) {
+export function readFile(directory, filename) {
+    const fullPath = getFullPath(directory, filename);
+    return fs.readFileSync(fullPath, 'utf8');
+}
+
+export function getFullPath(directory, filename="") {
     return path.join(
         remote.app.getPath('userData'),
-        directory
+        directory,
+        filename
     );
 }
