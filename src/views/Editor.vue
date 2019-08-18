@@ -41,6 +41,9 @@
                 <detected-objects-container :frames="objectFrames" />
                 <!-- <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container> -->
               </b-tab>
+              <b-tab v-if="features.keyframes" title="Visualisation">
+                <feature-canvas :images="features.keyframes"></feature-canvas>
+              </b-tab>
             </b-tabs>
           </div>
         </b-col>
@@ -69,6 +72,7 @@
 import VideoContainer from '../components/VideoContainer';
 import VideoFeatureContainer from '../components/VideoFeatureContainer';
 import DetectedObjectsContainer from '../components/DetectedObjectsContainer';
+import FeatureCanvas from '../components/FeatureCanvas';
 import { BContainer, BRow, BCol, BTabs, BTab } from 'bootstrap-vue';
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
@@ -87,6 +91,7 @@ export default {
     VideoContainer,
     VideoFeatureContainer,
     DetectedObjectsContainer,
+    FeatureCanvas,
     BContainer,
     BRow,
     BCol,
