@@ -88,6 +88,12 @@ export default {
     },
     seek(timestamp) {
       this.player.currentTime(parseFloat(timestamp));
+    },
+    getResolution() {
+      return {
+        width: this.player.videoWidth(),
+        height: this.player.videoHeight()
+      };
     }
   }
 };

@@ -42,7 +42,7 @@
                 <!-- <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container> -->
               </b-tab>
               <b-tab v-if="features.keyframes" title="Visualisation">
-                <feature-canvas :images="features.keyframes"></feature-canvas>
+                <feature-canvas :images="features.keyframes" :resolution="resolution"></feature-canvas>
               </b-tab>
             </b-tabs>
           </div>
@@ -103,6 +103,7 @@ export default {
       files: [],
       filePath: '',
       framerate: 0,
+      resolution: {},
       features: {},
       objectFrames: [],
       videoOptions: {
@@ -134,6 +135,10 @@ export default {
     },
     updateFramerate(framerate) {
       this.framerate = framerate;
+      this.updateResolution();
+    },
+    updateResolution() {
+      this.resolution = this.$refs.videoContainer.getResolution()
     },
     togglePlaying() {
       this.$refs.videoContainer.togglePlaying();
