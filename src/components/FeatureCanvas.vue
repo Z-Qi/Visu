@@ -1,12 +1,9 @@
 <template>
-  <div id="stage" />
+  <div id="stage" ref="stage" style="width: 100%"/>
 </template>
 
 <script>
 import Konva from 'konva';
-
-let width = window.innerWidth / 2;
-let height = window.innerHeight / 2;
 
 export default {
   props: {
@@ -22,7 +19,8 @@ export default {
   data() {
     return {
       stage: null,
-      layer: null,
+      imageLayer: null,
+      linkLayer: null,
       canvasImages: []
     };
   },
@@ -34,19 +32,51 @@ export default {
   mounted() {
     this.stage = new Konva.Stage({
       container: 'stage',
-      width: width,
-      height: height,
+      width: window.innerWidth / 2,
+      height: window.innerHeight / 2,
       draggable: true
     });
 
-    this.layer = new Konva.Layer();
-    this.stage.add(this.layer);
+    this.imageLayer = new Konva.Layer();
+    this.linkLayer = new Konva.Layer();
+    this.stage.add(this.imageLayer);
+    this.stage.add(this.linkLayer);
+
+    this.stage.on('wheel', e => {
+      e.evt.preventDefault();
+      const scaleBy = 1.05;
+      const oldScale = this.stage.scaleX();
+      const mousePos = this.stage.getPointerPosition();
+      const mousePointTo = {
+        x: mousePos.x / oldScale - this.stage.x() / oldScale,
+        y: mousePos.y / oldScale - this.stage.y() / oldScale
+      }
+
+      const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
+      this.stage.scale({x: newScale, y: newScale});
+
+      const newPos = {
+        x: -(mousePointTo.x - mousePos.x / newScale) * newScale,
+        y: -(mousePointTo.y - mousePos.y / newScale) * newScale
+      };
+      this.stage.position(newPos);
+      
+      this.stage.batchDraw();
+    });
+
+    window.addEventListener('resize', () => {
+      this.stage.size({
+        width: this.$refs.stage.clientWidth,
+        height: this.$refs.stage.clientHeight,
+      });
+      this.stage.batchDraw();
+    });
 
     this.updateImages();
   },
   methods: {
-    updateImages() {
-      this.layer.removeChildren();
+    async updateImages() {
+      this.imageLayer.removeChildren();
       this.canvasImages = [];
 
       const width = 250;
@@ -59,24 +89,27 @@ export default {
           height: (width * this.resolution.height) / this.resolution.width,
           draggable: true
         });
-        this.layer.add(konvaImage);
+        konvaImage.on('dragmove', () => this.linkImages());
+        this.imageLayer.add(konvaImage);
 
         let image = new window.Image();
-        image.onload = () => {
-          this.canvasImages[i] = konvaImage;
-
-          konvaImage.image(image);
-          this.linkImages();
-
-          this.layer.draw();
-        };
-
         image.src = this.images[i].src;
+        await this.loadImage(image);
+        // image.onload = () => {
+        this.canvasImages.push(konvaImage);
+
+        konvaImage.image(image);
+
+        this.imageLayer.draw();
+        // };
       }
+      this.linkImages();
     },
     linkImages() {
-      if (this.canvasImages.length != this.images.length) return;
+      if (this.canvasImages.length !== this.images.length) 
+        return;
 
+      this.linkLayer.removeChildren();
       let images = this.canvasImages;
       for (let i = 1; i < images.length; i++) {
         let a = images[i - 1];
@@ -89,8 +122,14 @@ export default {
           points: points,
           stroke: 'black'
         });
-        this.layer.add(link);
+        this.linkLayer.add(link);
       }
+      this.linkLayer.draw();
+    },
+    loadImage(image) {
+      return new Promise(resolve => {
+        image.onload = resolve;
+      });
     }
   }
 };
