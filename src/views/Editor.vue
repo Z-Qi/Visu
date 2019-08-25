@@ -13,13 +13,13 @@
         <b-col>
           <video-container
             ref="videoContainer"
-            :path="filePath"
+            :path="video ? video.path : ''"
             :options="videoOptions"
             v-on:framerate-updated="updateFramerate"
           ></video-container>
 
           <div>
-            <label for="videoFile">Open Video</label>
+            <label id="video-btn" for="videoFile">Open Video</label>
             <input
               id="videoFile"
               type="file"
@@ -37,12 +37,8 @@
               <b-tab title="Keyframes" active>
                 <video-feature-container :features="features" v-on:frame-selected="seek" />
               </b-tab>
-              <b-tab title="Objects">
-                <detected-objects-container :frames="objectFrames" />
-                <!-- <video-feature-container :features="features" v-on:frame-selected="seek"></video-feature-container> -->
-              </b-tab>
-              <b-tab v-if="features.keyframes" title="Visualisation">
-                <feature-canvas :images="features.keyframes" :resolution="resolution"></feature-canvas>
+              <b-tab v-if="features.processedFrames" title="Visualisation">
+                <feature-canvas :images="features.processedFrames" :resolution="video.resolution"></feature-canvas>
               </b-tab>
             </b-tabs>
           </div>
@@ -51,17 +47,14 @@
 
       <b-row>
         <b-col>
-          <button :disabled="framerate == 0" @click="yolo">Run yolo</button>
+          <b-button :disabled="!video" @click="skipFrames(-framerate)" variant="primary">&lt;&lt;</b-button>
+          <b-button :disabled="!video" @click="skipFrames(-1)" variant="primary">&lt;</b-button>
+          <b-button :disabled="!video" @click="togglePlaying" variant="primary">Play/Pause</b-button>
+          <b-button :disabled="!video" @click="skipFrames(1)" variant="primary">&gt;</b-button>
+          <b-button :disabled="!video" @click="skipFrames(framerate)" variant="primary">&gt;&gt;</b-button>
         </b-col>
         <b-col>
-          <button :disabled="framerate == 0" @click="skipFrames(-framerate)">&lt;&lt;</button>
-          <button :disabled="framerate == 0" @click="skipFrames(-1)">&lt;</button>
-          <button :disabled="framerate == 0" @click="togglePlaying">Play/Pause</button>
-          <button :disabled="framerate == 0" @click="skipFrames(1)">&gt;</button>
-          <button :disabled="framerate == 0" @click="skipFrames(framerate)">&gt;&gt;</button>
-        </b-col>
-        <b-col>
-          <button :disabled="framerate == 0" @click="keyframes">Show keyframes</button>
+          <b-button :disabled="!video" @click="processVideo" variant="primary">Process Video</b-button>
         </b-col>
       </b-row>
     </b-container>
@@ -73,13 +66,22 @@ import VideoContainer from '../components/VideoContainer';
 import VideoFeatureContainer from '../components/VideoFeatureContainer';
 import DetectedObjectsContainer from '../components/DetectedObjectsContainer';
 import FeatureCanvas from '../components/FeatureCanvas';
-import { BContainer, BRow, BCol, BTabs, BTab } from 'bootstrap-vue';
+import { BContainer, BRow, BCol, BTabs, BTab, BButton, BFormFile } from 'bootstrap-vue';
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 
-import { detectObjects } from '../feature_detection/yolo';
-import { extractKeyframes, getShotBoundaryInfo } from '../feature_detection/keyframes';
+import {
+  detectObjects,
+  detectObjectsInFrames,
+} from '../feature_detection/yolo';
+import {
+  extractKeyframes,
+  getShotBoundaryInfo,
+} from '../feature_detection/keyframes';
+import { extractFrames } from '../util/extract_frames';
+import * as util from '../feature_detection/util';
 import { spawn } from 'child_process';
+import Video from '../util/video';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
@@ -96,22 +98,18 @@ export default {
     BRow,
     BCol,
     BTabs,
-    BTab
+    BTab,
   },
   data() {
     return {
-      files: [],
-      filePath: '',
-      framerate: 0,
-      resolution: {},
+      video: null,
       features: {},
-      objectFrames: [],
       videoOptions: {
         autoplay: false,
         controls: true,
         fluid: true,
-        sources: []
-      }
+        sources: [],
+      },
     };
   },
   mounted() {
@@ -121,24 +119,23 @@ export default {
   },
   methods: {
     loadVideo() {
-      this.files = this.$refs.videoInput.files;
-      this.filePath = this.files[0].path;
+      this.video = new Video(this.$refs.videoInput.files[0].path);
       this.features = {};
       this.videoOptions = Object.assign({}, this.videoOptions, {
         sources: [
           {
             src: URL.createObjectURL(this.$refs.videoInput.files[0]),
-            type: this.$refs.videoInput.files[0].type
-          }
-        ]
+            type: this.$refs.videoInput.files[0].type,
+          },
+        ],
       });
     },
     updateFramerate(framerate) {
-      this.framerate = framerate;
+      this.video.framerate = framerate;
       this.updateResolution();
     },
     updateResolution() {
-      this.resolution = this.$refs.videoContainer.getResolution()
+      this.video.resolution = this.$refs.videoContainer.getResolution();
     },
     togglePlaying() {
       this.$refs.videoContainer.togglePlaying();
@@ -149,21 +146,17 @@ export default {
     seek(timestamp) {
       this.$refs.videoContainer.seek(timestamp);
     },
-    async yolo() {
-      let objects = await detectObjects(this.filePath, '1');
-      console.log(objects);
-      this.objectFrames = objects;
-    },
-    async keyframes() {
-      //changed to 5 for testing on short videos
-      const extractedKeyframes = await extractKeyframes(this.filePath, 5, this.framerate);
-      console.log(extractedKeyframes);
+    async processVideo() {
+      const extractedKeyframes = await extractKeyframes(this.video, 5);
+      // todo: add option to use other other frames
+      // todo: figure out what to do with sbd info
+      const processedFrames = await detectObjectsInFrames(extractedKeyframes);
       this.features = {
-        keyframes: extractedKeyframes.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1)),
-        shotBoundaries: getShotBoundaryInfo().boundaries
+        keyframes: extractedKeyframes,
+        processedFrames: processedFrames,
       };
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -190,4 +183,13 @@ export default {
   height: 100%;
   overflow-x: auto;
 }
+
+#video-btn {
+  background: var(--blue);
+  color: white;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+}
+
 </style>

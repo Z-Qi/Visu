@@ -8,27 +8,25 @@ export const FRAME_DIR = '.frames/';
 export const SHOT_DIR = '.shots/';
 
 export function createDirectory(directory) {
-    fs.mkdirSync(getFullPath(directory));
+  fs.mkdirSync(getFullPath(directory));
 }
 
 export function removeDirectory(directory) {
-    rimraf.sync(getFullPath(directory));
+  rimraf.sync(getFullPath(directory));
 }
 
 export function readDirectory(directory) {
-    const fullPath = getFullPath(directory);
-    return fs.readdirSync(getFullPath(directory)).map(p => path.join(fullPath, p));
+  const fullPath = getFullPath(directory);
+  return fs
+    .readdirSync(getFullPath(directory))
+    .map(p => path.join(fullPath, p));
 }
 
 export function readFile(directory, filename) {
-    const fullPath = getFullPath(directory, filename);
-    return fs.readFileSync(fullPath, 'utf8');
+  const fullPath = getFullPath(directory, filename);
+  return fs.readFileSync(fullPath, 'utf8');
 }
 
-export function getFullPath(directory, filename="") {
-    return path.join(
-        remote.app.getPath('userData'),
-        directory,
-        filename
-    );
+export function getFullPath(directory, filename = '') {
+  return path.join(remote.app.getPath('userData'), directory, filename);
 }

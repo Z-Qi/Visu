@@ -60,25 +60,25 @@ keyframes = list(
     )
 )
 
-shot_boundaries = {
-    'boundaries': list(
-        map(
-            lambda boundary: { 'start': int(boundary[0]), 'end': int(boundary[1]) },
-            map(
-                lambda shot: re.sub('[\[\]]', '', shot).split(':'),
-                    re.search('(?<=shots: ).+', hecate_result).group().split(',')
-            )
-        )
-    )
-}
+# shot_boundaries = {
+#     'boundaries': list(
+#         map(
+#             lambda boundary: { 'start': int(boundary[0]), 'end': int(boundary[1]) },
+#             map(
+#                 lambda shot: re.sub('[\[\]]', '', shot).split(':'),
+#                     re.search('(?<=shots: ).+', hecate_result).group().split(',')
+#             )
+#         )
+#     )
+# }
 
-shots_dir = args.keyframe_dir.replace('keyframes', 'shots')
+# shots_dir = args.keyframe_dir.replace('keyframes', 'shots')
 
-os.mkdir(shots_dir)
+# os.mkdir(shots_dir)
 
-f = open(os.path.join(shots_dir, 'shot_boundaries.json'), 'x')
-f.write(json.dumps(shot_boundaries))
-f.close
+# f = open(os.path.join(shots_dir, 'shot_boundaries.json'), 'x')
+# f.write(json.dumps(shot_boundaries))
+# f.close()
 
 ffmpeg_frame_str = ''
 for frame in keyframes:
@@ -97,6 +97,6 @@ subprocess.run(
         '0',
         '-frame_pts',
         '1',
-        os.path.join(args.keyframe_dir, 'keyframe_%d.jpg')
+        os.path.join(args.keyframe_dir, 'frame_%6d.jpg')
     ]
 )
