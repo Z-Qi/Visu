@@ -1,60 +1,60 @@
 <template>
-  <div class="full-height">
-    <b-container fluid class="full-height">
-      <b-row>
+  <div>
+    <b-container fluid>
+      <!-- <b-row>
         <b-col>
           <header class="header">
             <h1>Video Editor</h1>
           </header>
         </b-col>
-      </b-row>
+      </b-row> -->
 
-      <b-row class="main-content" no-gutters>
-        <b-col>
+      <b-row class="main-content">
+        <b-col cols="4">
           <video-container
             ref="videoContainer"
             :path="video ? video.path : ''"
             :options="videoOptions"
             v-on:framerate-updated="updateFramerate"
           ></video-container>
-
-          <div>
-            <label id="video-btn" for="videoFile">Open Video</label>
-            <input
-              id="videoFile"
-              type="file"
-              ref="videoInput"
-              accept="video/*"
-              @change="loadVideo"
-              style="display: none"
-            />
-          </div>
+          <b-row v-if="video" align-h="center" class="mt-1" no-gutters>
+            <b-button class="mr-1" @click="skipFrames(-video.framerate)" variant="dark">&lt;&lt;</b-button>
+            <b-button class="mr-1" @click="skipFrames(-1)" variant="dark">&lt;</b-button>
+            <b-button class="mr-1 flex-grow-1" @click="togglePlaying" variant="dark">Play/Pause</b-button>
+            <b-button class="mr-1" @click="skipFrames(1)" variant="dark">&gt;</b-button>
+            <b-button @click="skipFrames(video.framerate)" variant="dark">&gt;&gt;</b-button>
+          </b-row>
+          <b-row align-h="start" class="mt-1" no-gutters>
+            <b-col cols="4">
+              <label id="video-btn" for="videoFile">Open Video</label>
+              <input
+                id="videoFile"
+                type="file"
+                ref="videoInput"
+                accept="video/*"
+                @change="loadVideo"
+                style="display: none"
+              />
+            </b-col>
+          </b-row>
         </b-col>
 
-        <b-col data-simplebar class="scrollable">
+        <b-col data-simplebar class="scrollable" cols="8">
           <div>
             <b-tabs pills card>
-              <b-tab title="Keyframes" active>
-                <video-feature-container :features="features" v-on:frame-selected="seek" />
+              <b-tab title="Visualisation" active>
+                <b-spinner v-if="video && !features.processedFrames" variant="primary"></b-spinner>
+                <feature-canvas
+                  v-if="features.processedFrames"
+                  :images="features.processedFrames"
+                  :resolution="video.resolution"
+                ></feature-canvas>
               </b-tab>
-              <b-tab v-if="features.processedFrames" title="Visualisation">
-                <feature-canvas :images="features.processedFrames" :resolution="video.resolution"></feature-canvas>
+              <b-tab title="Keyframes" v-if="features.processedFrames">
+                <video-feature-container :features="features" v-on:frame-selected="seek" />
               </b-tab>
             </b-tabs>
           </div>
-        </b-col>
-      </b-row>
-
-      <b-row>
-        <b-col>
-          <b-button :disabled="!video" @click="skipFrames(-framerate)" variant="primary">&lt;&lt;</b-button>
-          <b-button :disabled="!video" @click="skipFrames(-1)" variant="primary">&lt;</b-button>
-          <b-button :disabled="!video" @click="togglePlaying" variant="primary">Play/Pause</b-button>
-          <b-button :disabled="!video" @click="skipFrames(1)" variant="primary">&gt;</b-button>
-          <b-button :disabled="!video" @click="skipFrames(framerate)" variant="primary">&gt;&gt;</b-button>
-        </b-col>
-        <b-col>
-          <b-button :disabled="!video" @click="processVideo" variant="primary">Process Video</b-button>
         </b-col>
       </b-row>
     </b-container>
@@ -66,7 +66,16 @@ import VideoContainer from '../components/VideoContainer';
 import VideoFeatureContainer from '../components/VideoFeatureContainer';
 import DetectedObjectsContainer from '../components/DetectedObjectsContainer';
 import FeatureCanvas from '../components/FeatureCanvas';
-import { BContainer, BRow, BCol, BTabs, BTab, BButton, BFormFile } from 'bootstrap-vue';
+import {
+  BContainer,
+  BRow,
+  BCol,
+  BTabs,
+  BTab,
+  BButton,
+  BFormFile,
+  BSpinner,
+} from 'bootstrap-vue';
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 
@@ -99,6 +108,7 @@ export default {
     BCol,
     BTabs,
     BTab,
+    BSpinner,
   },
   data() {
     return {
@@ -118,7 +128,7 @@ export default {
     });
   },
   methods: {
-    loadVideo() {
+    async loadVideo() {
       this.video = new Video(this.$refs.videoInput.files[0].path);
       this.features = {};
       this.videoOptions = Object.assign({}, this.videoOptions, {
@@ -129,6 +139,7 @@ export default {
           },
         ],
       });
+      await this.processVideo();
     },
     updateFramerate(framerate) {
       this.video.framerate = framerate;
@@ -161,17 +172,12 @@ export default {
 </script>
 
 <style scoped>
-.full-height {
-  height: 100%;
-}
-
 .header {
   max-height: 15%;
   margin: 50px 0px 0px 0px;
 }
 
 .main-content {
-  height: 70%;
   margin: 50px 0px;
 }
 
@@ -190,6 +196,6 @@ export default {
   cursor: pointer;
   border-radius: 0.25rem;
   padding: 0.5rem 1rem;
+  width: 100%;
 }
-
 </style>

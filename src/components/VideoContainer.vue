@@ -1,7 +1,6 @@
 <template>
   <div>
     <video ref="videoPlayer" class="video-js"></video>
-    <div>Framerate: {{ framerate }}</div>
   </div>
 </template>
 
@@ -90,6 +89,7 @@ export default {
       this.player.currentTime(parseFloat(timestamp));
     },
     getResolution() {
+      console.log(this.player.videoWidth());
       return {
         width: this.player.videoWidth(),
         height: this.player.videoHeight()

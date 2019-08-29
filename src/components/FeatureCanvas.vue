@@ -1,8 +1,8 @@
 <template>
   <div>
     <b-form-select v-model="filter" :options="options" multiple :select-size="4"></b-form-select>
-    <b-button variant="outline-primary" @click="filterImages">Add filter</b-button>
-    <div id="stage" ref="stage" style="width: 100%" />
+    <b-button id="filter-btn" variant="outline-primary" @click="filterImages">Add filter</b-button>
+    <div id="stage" ref="stage" />
   </div>
 </template>
 
@@ -37,10 +37,14 @@ export default {
     },
   },
   mounted() {
+    const stageStyle = window.getComputedStyle(this.$refs.stage);
     this.stage = new Konva.Stage({
       container: 'stage',
-      width: window.innerWidth / 2,
-      height: window.innerHeight / 3,
+      width:
+        this.$refs.stage.clientWidth -
+        parseFloat(stageStyle.paddingLeft) -
+        parseFloat(stageStyle.paddingRight),
+      height: window.innerHeight / 2,
       draggable: true,
     });
 
@@ -74,8 +78,10 @@ export default {
 
     window.addEventListener('resize', () => {
       this.stage.size({
-        width: this.$refs.stage.clientWidth,
-        height: this.$refs.stage.clientHeight,
+        width: this.$refs.stage.clientWidth -
+          parseFloat(stageStyle.paddingLeft) -
+          parseFloat(stageStyle.paddingRight),
+        height: window.innerHeight / 2,
       });
       this.stage.batchDraw();
     });
@@ -89,15 +95,17 @@ export default {
       this.options = [];
 
       const width = 250;
+      const height = (width * this.resolution.height) / this.resolution.width;
+      const y = (this.stage.getHeight() / 2 - height / 2);
 
       for (const i in this.images) {
         console.log(this.images[i]);
         this.options.push(...this.images[i].objects);
         let konvaImage = new Konva.Image({
           x: 50 + (75 + width) * i,
-          y: 200,
+          y: y,
           width: width,
-          height: (width * this.resolution.height) / this.resolution.width,
+          height: height,
           draggable: true,
         });
         konvaImage.on('dragmove', () => this.linkImages());
@@ -131,12 +139,12 @@ export default {
           b.x(),
           b.y() + b.height() / 2,
         ];
-        console.log(a);
-        console.log(b);
-        console.log(points);
         let link = new Konva.Arrow({
           points: points,
-          stroke: 'black',
+          pointerLength: 15,
+          pointerWidth: 15,
+          stroke: '#007bff',
+          fill: '#007bff'
         });
         this.linkLayer.add(link);
       }
@@ -159,3 +167,18 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+#stage {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+#filter-btn {
+  margin-top: 10px;
+}
+</style>
