@@ -40,10 +40,7 @@ export default {
     const stageStyle = window.getComputedStyle(this.$refs.stage);
     this.stage = new Konva.Stage({
       container: 'stage',
-      width:
-        this.$refs.stage.clientWidth -
-        parseFloat(stageStyle.paddingLeft) -
-        parseFloat(stageStyle.paddingRight),
+      width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
       height: window.innerHeight / 2,
       draggable: true,
     });
@@ -63,8 +60,7 @@ export default {
         y: mousePos.y / oldScale - this.stage.y() / oldScale,
       };
 
-      const newScale =
-        e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
+      const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
       this.stage.scale({ x: newScale, y: newScale });
 
       const newPos = {
@@ -78,9 +74,7 @@ export default {
 
     window.addEventListener('resize', () => {
       this.stage.size({
-        width: this.$refs.stage.clientWidth -
-          parseFloat(stageStyle.paddingLeft) -
-          parseFloat(stageStyle.paddingRight),
+        width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
         height: window.innerHeight / 2,
       });
       this.stage.batchDraw();
@@ -96,7 +90,7 @@ export default {
 
       const width = 250;
       const height = (width * this.resolution.height) / this.resolution.width;
-      const y = (this.stage.getHeight() / 2 - height / 2);
+      const y = this.stage.getHeight() / 2 - height / 2;
 
       for (const i in this.images) {
         console.log(this.images[i]);
@@ -133,18 +127,13 @@ export default {
       for (let i = 1; i < images.length; i++) {
         let a = images[i - 1];
         let b = images[i];
-        let points = [
-          a.x() + a.width(),
-          a.y() + a.height() / 2,
-          b.x(),
-          b.y() + b.height() / 2,
-        ];
+        let points = [a.x() + a.width(), a.y() + a.height() / 2, b.x(), b.y() + b.height() / 2];
         let link = new Konva.Arrow({
           points: points,
           pointerLength: 15,
           pointerWidth: 15,
           stroke: '#007bff',
-          fill: '#007bff'
+          fill: '#007bff',
         });
         this.linkLayer.add(link);
       }

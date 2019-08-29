@@ -1,16 +1,8 @@
 <template>
-  <div>
-    <b-container fluid>
-      <!-- <b-row>
+  <div class="full-height">
+    <b-container fluid class="full-height">
+      <b-row class="main-content" no-gutters>
         <b-col>
-          <header class="header">
-            <h1>Video Editor</h1>
-          </header>
-        </b-col>
-      </b-row> -->
-
-      <b-row class="main-content">
-        <b-col cols="4">
           <video-container
             ref="videoContainer"
             :path="video ? video.path : ''"
@@ -51,7 +43,7 @@
                 ></feature-canvas>
               </b-tab>
               <b-tab title="Keyframes" v-if="features.processedFrames">
-                <video-feature-container :features="features" v-on:frame-selected="seek" />
+                <video-feature-container :features="features" />
               </b-tab>
             </b-tabs>
           </div>
@@ -66,27 +58,12 @@ import VideoContainer from '../components/VideoContainer';
 import VideoFeatureContainer from '../components/VideoFeatureContainer';
 import DetectedObjectsContainer from '../components/DetectedObjectsContainer';
 import FeatureCanvas from '../components/FeatureCanvas';
-import {
-  BContainer,
-  BRow,
-  BCol,
-  BTabs,
-  BTab,
-  BButton,
-  BFormFile,
-  BSpinner,
-} from 'bootstrap-vue';
+import { BContainer, BRow, BCol, BTabs, BTab, BButton, BFormFile, BSpinner } from 'bootstrap-vue';
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 
-import {
-  detectObjects,
-  detectObjectsInFrames,
-} from '../feature_detection/yolo';
-import {
-  extractKeyframes,
-  getShotBoundaryInfo,
-} from '../feature_detection/keyframes';
+import { detectObjects, detectObjectsInFrames } from '../feature_detection/yolo';
+import { extractKeyframes, getShotBoundaryInfo } from '../feature_detection/keyframes';
 import { extractFrames } from '../util/extract_frames';
 import * as util from '../feature_detection/util';
 import { spawn } from 'child_process';
@@ -117,8 +94,18 @@ export default {
       videoOptions: {
         autoplay: false,
         controls: true,
+        preload: 'auto',
         fluid: true,
         sources: [],
+        children: {
+          controlBar: {
+            children: {
+              playToggle: true,
+              volumeControl: true,
+              fullscreenToggle: true,
+            },
+          },
+        },
       },
     };
   },
@@ -154,14 +141,12 @@ export default {
     skipFrames(frames) {
       this.$refs.videoContainer.skipFrames(frames);
     },
-    seek(timestamp) {
-      this.$refs.videoContainer.seek(timestamp);
-    },
     async processVideo() {
       const extractedKeyframes = await extractKeyframes(this.video, 5);
       // todo: add option to use other other frames
       // todo: figure out what to do with sbd info
       const processedFrames = await detectObjectsInFrames(extractedKeyframes);
+      // const processedFrames = extractedKeyframes;
       this.features = {
         keyframes: extractedKeyframes,
         processedFrames: processedFrames,
@@ -171,18 +156,18 @@ export default {
 };
 </script>
 
-<style scoped>
-.header {
-  max-height: 15%;
-  margin: 50px 0px 0px 0px;
+<style>
+.full-height {
+  height: 100%;
 }
 
 .main-content {
-  margin: 50px 0px;
+  height: 80%;
+  padding-top: 15px;
 }
 
 .footer {
-  max-height: 15%;
+  max-height: 20%;
 }
 
 .scrollable {
@@ -197,5 +182,9 @@ export default {
   border-radius: 0.25rem;
   padding: 0.5rem 1rem;
   width: 100%;
+}
+
+.video-js .vjs-volume-control {
+  margin-right: auto;
 }
 </style>
