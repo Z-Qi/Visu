@@ -7,9 +7,9 @@
             <h1>Video Editor</h1>
           </header>
         </b-col>
-      </b-row> -->
+      </b-row>-->
 
-      <b-row class="main-content">
+      <b-row class="m-4" no-gutters>
         <b-col cols="4">
           <video-container
             ref="videoContainer"
@@ -38,8 +38,10 @@
             </b-col>
           </b-row>
         </b-col>
+      </b-row>
 
-        <b-col data-simplebar class="scrollable" cols="8">
+      <b-row class="m-4" no-gutters>
+        <b-col data-simplebar class="scrollable" cols="12">
           <div>
             <b-tabs pills card>
               <b-tab title="Visualisation" active>
