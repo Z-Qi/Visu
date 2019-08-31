@@ -41,10 +41,7 @@ export default {
     const stageStyle = window.getComputedStyle(this.$refs.stage);
     this.stage = new Konva.Stage({
       container: 'stage',
-      width:
-        this.$refs.stage.clientWidth -
-        parseFloat(stageStyle.paddingLeft) -
-        parseFloat(stageStyle.paddingRight),
+      width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
       height: window.innerHeight / 2,
       draggable: true,
     });
@@ -64,8 +61,7 @@ export default {
         y: mousePos.y / oldScale - this.stage.y() / oldScale,
       };
 
-      const newScale =
-        e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
+      const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
       this.stage.scale({ x: newScale, y: newScale });
 
       const newPos = {
@@ -79,10 +75,7 @@ export default {
 
     window.addEventListener('resize', () => {
       this.stage.size({
-        width:
-          this.$refs.stage.clientWidth -
-          parseFloat(stageStyle.paddingLeft) -
-          parseFloat(stageStyle.paddingRight),
+        width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
         height: window.innerHeight / 2,
       });
       this.stage.batchDraw();
@@ -136,12 +129,7 @@ export default {
         for (let j = 1; j < images.length; ++j) {
           const a = images[j - 1];
           const b = images[j];
-          const points = [
-            a.x() + a.width(),
-            a.y() + a.height() / 2,
-            b.x(),
-            b.y() + b.height() / 2,
-          ];
+          const points = [a.x() + a.width(), a.y() + a.height() / 2, b.x(), b.y() + b.height() / 2];
           const link = new Konva.Arrow({
             points: points,
             pointerLength: 15,
@@ -166,15 +154,13 @@ export default {
     addFilter(filter) {
       this.filterRows.push({
         filter: filter,
-        images: this.images.filter(img =>
-          filter.every(val => img.objects.includes(val))
-        ),
+        images: this.images.filter(img => filter.every(val => img.objects.includes(val))),
       });
     },
     addNewFilter() {
       this.addFilter(this.filter);
       this.drawImages();
-    }
+    },
   },
 };
 </script>
