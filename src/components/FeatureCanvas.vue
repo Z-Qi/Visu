@@ -26,6 +26,7 @@ export default {
       stage: null,
       imageLayer: null,
       linkLayer: null,
+      overlayLayer: null,
       filter: [],
       filterRows: [],
       options: [],
@@ -46,10 +47,12 @@ export default {
       draggable: true,
     });
 
-    this.imageLayer = new Konva.Layer();
     this.linkLayer = new Konva.Layer();
-    this.stage.add(this.imageLayer);
+    this.imageLayer = new Konva.Layer();
+    this.overlayLayer = new Konva.Layer();
     this.stage.add(this.linkLayer);
+    this.stage.add(this.imageLayer);
+    this.stage.add(this.overlayLayer);
 
     this.stage.on('wheel', e => {
       e.evt.preventDefault();
@@ -99,25 +102,66 @@ export default {
       }
 
       this.options = [...new Set(this.options)];
+      this.stage.scale({ x: 0.2, y: 0.2 });
+      this.stage.position({ x: 0, y: this.stage.height() / 2 });
       await this.drawImages();
     },
     async drawImages() {
       this.imageLayer.removeChildren();
       const width = 250;
       const height = (width * this.resolution.height) / this.resolution.width;
-      const y = this.stage.getHeight() / 2 - height / 2;
+      const y = height;
 
       for (const i in this.filterRows) {
         const images = this.filterRows[i].images;
         this.filterRows[i].canvasImages = [];
         for (const j in images) {
           const konvaImage = new Konva.Image({
-            x: 50 + (75 + width) * this.indexMap.get(images[j].src),
+            x: 0 + (75 + width) * this.indexMap.get(images[j].src),
             y: y - i * 300,
             width: width,
             height: height,
             image: await this.loadImage(images[j].src),
           });
+
+          konvaImage.on('mouseenter', () => {
+            this.overlayLayer.removeChildren();
+            const mousePos = this.stage.getPointerPosition();
+            const scale = 1 / this.stage.scaleX() <= 1.5 ? 1.5 : 1 / this.stage.scaleX();
+            const size = {
+              width: konvaImage.width() * scale,
+              height: konvaImage.height() * scale,
+            };
+            let x = konvaImage.x() - size.width / 2 + konvaImage.width() / 2;
+
+            const leftStageEdge = -this.stage.position().x / this.stage.scaleX();
+            const rightStageEdge = (this.stage.width() - this.stage.position().x) / this.stage.scaleX();
+
+            if (x <= leftStageEdge) {
+              x = leftStageEdge
+            } else if ((x + size.width) >= rightStageEdge) {
+              x = rightStageEdge - size.width;
+            }
+
+            const overlayImage = new Konva.Image({
+              x: x,
+              y: konvaImage.y() - size.height - 20,
+              width: size.width,
+              height: size.height,
+              image: konvaImage.image(),
+              shadowColor: '#000',
+              shadowBlur: 38,
+              shadowOffset: { x: 0, y: 19 },
+              shadowOpacity: 0.4,
+            });
+            this.overlayLayer.add(overlayImage);
+            this.overlayLayer.draw();
+          });
+          konvaImage.on('mouseout', () => {
+            this.overlayLayer.removeChildren();
+            this.overlayLayer.draw();
+          });
+
           this.filterRows[i].canvasImages.push(konvaImage);
           this.imageLayer.add(konvaImage);
         }
