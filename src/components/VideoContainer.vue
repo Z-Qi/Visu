@@ -12,12 +12,37 @@
       ref="slider"
       v-model="values"
       v-bind="sliderOptions"
-      @dragstart="dragging = true"
-      @dragend="dragging = false"
+      @drag-start="dragging = true"
+      @drag-end="dragging = false"
     >
     </vue-slider>
+    <b-container>
+      <b-row align-h="center" class="mt-1" no-gutters>
+        <b-button class="mr-1" :disabled="framerate == 0" @click="skipFrames(-framerate)" variant="dark">
+          &lt;&lt;
+        </b-button>
+        <b-button class="mr-1" :disabled="framerate == 0" @click="skipFrames(-1)" variant="dark">&lt;</b-button>
+        <b-button
+          class="mr-1 flex-grow-1"
+          :disabled="framerate == 0"
+          @click="togglePlaying"
+          variant="dark"
+          v-text="playing ? 'Pause' : 'Play'"
+        ></b-button>
+        <b-button class="mr-1" :disabled="framerate == 0" @click="skipFrames(1)" variant="dark">&gt;</b-button>
+        <b-button class="mr-1" :disabled="framerate == 0" @click="skipFrames(framerate)" variant="dark"
+          >&gt;&gt;</b-button
+        >
+      </b-row>
+    </b-container>
   </div>
 </template>
+
+<style>
+.video-js .vjs-volume-control {
+  margin-right: auto;
+}
+</style>
 
 <script>
 import videojs from 'video.js';
@@ -94,15 +119,17 @@ export default {
         this.values[1] = this.values[0];
       }
 
-      this.currentSliderIndex = oldValues[0] != newValues[0] ? 0 : 1;
+      if (oldValues !== newValues) {
+        this.currentSliderIndex = oldValues[0] != newValues[0] ? 0 : 1;
+      }
+
       let currentFrame = oldValues[0] != newValues[0] ? newValues[0] : newValues[1];
 
       if (this.dragging || currentFrame == this.sliderOptions.max) {
         this.player.pause();
         this.playing = false;
+        this.player.currentTime(currentFrame / this.framerate);
       }
-
-      this.player.currentTime(currentFrame / this.framerate);
     },
   },
   methods: {
@@ -142,20 +169,14 @@ export default {
     togglePlaying() {
       if (this.player.paused()) {
         this.player.play();
-        this.$emit('playing');
       } else {
         this.player.pause();
-        this.$emit('paused');
       }
     },
     skipFrames(frames) {
       let time = this.player.currentTime();
       this.player.currentTime(time + frames / this.framerate);
       this.values[this.currentSliderIndex] += frames;
-    },
-    seek(timestamp) {
-      this.player.currentTime(parseFloat(timestamp));
-      this.values[this.currentSliderIndex] = parseFloat(timestamp) * this.framerate;
     },
     getResolution() {
       return {

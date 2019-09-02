@@ -92,8 +92,12 @@ export default {
 
       for (const i in this.images) {
         this.indexMap.set(this.images[i].src, i);
-        this.options.push(...this.images[i].objects);
+
+        if (this.images[i].objects) {
+          this.options.push(...this.images[i].objects);
+        }
       }
+
       this.options = [...new Set(this.options)];
       await this.drawImages();
     },

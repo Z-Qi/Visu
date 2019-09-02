@@ -9,13 +9,6 @@
             :options="videoOptions"
             v-on:framerate-updated="updateFramerate"
           ></video-container>
-          <b-row v-if="video" align-h="center" class="mt-1" no-gutters>
-            <b-button class="mr-1" @click="skipFrames(-video.framerate)" variant="dark">&lt;&lt;</b-button>
-            <b-button class="mr-1" @click="skipFrames(-1)" variant="dark">&lt;</b-button>
-            <b-button class="mr-1 flex-grow-1" @click="togglePlaying" variant="dark">Play/Pause</b-button>
-            <b-button class="mr-1" @click="skipFrames(1)" variant="dark">&gt;</b-button>
-            <b-button @click="skipFrames(video.framerate)" variant="dark">&gt;&gt;</b-button>
-          </b-row>
           <b-row align-h="start" class="mt-1" no-gutters>
             <b-col cols="4">
               <label id="video-btn" for="videoFile">Open Video</label>
@@ -137,12 +130,6 @@ export default {
     updateResolution() {
       this.video.resolution = this.$refs.videoContainer.getResolution();
     },
-    togglePlaying() {
-      this.$refs.videoContainer.togglePlaying();
-    },
-    skipFrames(frames) {
-      this.$refs.videoContainer.skipFrames(frames);
-    },
     async processVideo() {
       const extractedKeyframes = await extractKeyframes(this.video, 5);
       // todo: add option to use other other frames
@@ -158,7 +145,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .full-height {
   height: 100%;
 }
@@ -184,9 +171,5 @@ export default {
   border-radius: 0.25rem;
   padding: 0.5rem 1rem;
   width: 100%;
-}
-
-.video-js .vjs-volume-control {
-  margin-right: auto;
 }
 </style>
