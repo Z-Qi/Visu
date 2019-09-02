@@ -1,27 +1,9 @@
 <template>
-  <div class="full-height">
-    <b-container fluid class="full-height">
+  <div class="h-100">
+    <b-container fluid class="h-100">
       <b-row class="m-4" no-gutters>
-        <b-col cols="4">
-          <video-container
-            ref="videoContainer"
-            :path="video ? video.path : ''"
-            :options="videoOptions"
-            v-on:framerate-updated="updateFramerate"
-          ></video-container>
-          <b-row align-h="start" class="mt-1" no-gutters>
-            <b-col cols="4">
-              <label id="video-btn" for="videoFile">Open Video</label>
-              <input
-                id="videoFile"
-                type="file"
-                ref="videoInput"
-                accept="video/*"
-                @change="loadVideo"
-                style="display: none"
-              />
-            </b-col>
-          </b-row>
+        <b-col>
+          <video-container ref="videoContainer" @metadata-loaded="updateData"></video-container>
         </b-col>
       </b-row>
 
@@ -62,9 +44,7 @@ import { extractKeyframes, getShotBoundaryInfo } from '../feature_detection/keyf
 import { extractFrames } from '../util/extract_frames';
 import * as util from '../feature_detection/util';
 import { spawn } from 'child_process';
-import Video from '../util/video';
 import * as fs from 'fs';
-import * as path from 'path';
 import * as url from 'url';
 
 const { app, ipcRenderer } = window.require('electron');
@@ -86,22 +66,6 @@ export default {
     return {
       video: null,
       features: {},
-      videoOptions: {
-        autoplay: false,
-        controls: true,
-        preload: 'auto',
-        fluid: true,
-        sources: [],
-        children: {
-          controlBar: {
-            children: {
-              playToggle: true,
-              volumeControl: true,
-              fullscreenToggle: true,
-            },
-          },
-        },
-      },
     };
   },
   mounted() {
@@ -110,25 +74,10 @@ export default {
     });
   },
   methods: {
-    async loadVideo() {
-      this.video = new Video(this.$refs.videoInput.files[0].path);
-      this.features = {};
-      this.videoOptions = Object.assign({}, this.videoOptions, {
-        sources: [
-          {
-            src: URL.createObjectURL(this.$refs.videoInput.files[0]),
-            type: this.$refs.videoInput.files[0].type,
-          },
-        ],
-      });
+    async updateData(video) {
+      console.log(video);
+      this.video = video;
       await this.processVideo();
-    },
-    updateFramerate(framerate) {
-      this.video.framerate = framerate;
-      this.updateResolution();
-    },
-    updateResolution() {
-      this.video.resolution = this.$refs.videoContainer.getResolution();
     },
     async processVideo() {
       const extractedKeyframes = await extractKeyframes(this.video, 5);
@@ -146,10 +95,6 @@ export default {
 </script>
 
 <style scoped>
-.full-height {
-  height: 100%;
-}
-
 .main-content {
   height: 80%;
   padding-top: 15px;
@@ -162,14 +107,5 @@ export default {
 .scrollable {
   height: 100%;
   overflow-x: auto;
-}
-
-#video-btn {
-  background: var(--blue);
-  color: white;
-  cursor: pointer;
-  border-radius: 0.25rem;
-  padding: 0.5rem 1rem;
-  width: 100%;
 }
 </style>

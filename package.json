@@ -22,7 +22,8 @@
     "video.js": "^7.5.5",
     "vue": "^2.6.10",
     "vue-konva": "^2.0.8",
-    "vue-slider-component": "^3.0.39"
+    "vue-slider-component": "^3.0.39",
+    "vuedraggable": "^2.23.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.8.0",

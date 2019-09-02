@@ -85,7 +85,7 @@ export default {
   },
   methods: {
     async updateImages() {
-      this.fitlerRows = [];
+      this.filterRows = [];
       this.addFilter([]);
       this.options = [];
       this.indexMap = new Map();
@@ -103,7 +103,6 @@ export default {
     },
     async drawImages() {
       this.imageLayer.removeChildren();
-
       const width = 250;
       const height = (width * this.resolution.height) / this.resolution.width;
       const y = this.stage.getHeight() / 2 - height / 2;
