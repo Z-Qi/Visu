@@ -28,35 +28,23 @@
           <b-col>
             <b-button
               class="mx-1"
-              :disabled="video.framerate == 0"
+              :disabled="!video.framerate"
               @click="skipFrames(-video.framerate)"
               variant="dark"
               v-text="'<<'"
             />
-            <b-button
-              class="mx-1"
-              :disabled="video.framerate == 0"
-              @click="skipFrames(-1)"
-              variant="dark"
-              v-text="'<'"
-            />
+            <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(-1)" variant="dark" v-text="'<'" />
             <b-button
               class="mx-1 flex-grow-1"
-              :disabled="video.framerate == 0"
+              :disabled="!video.framerate"
               @click="togglePlaying"
               variant="dark"
               v-text="playing ? 'Pause' : 'Play'"
             />
+            <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(1)" variant="dark" v-text="'>'" />
             <b-button
               class="mx-1"
-              :disabled="video.framerate == 0"
-              @click="skipFrames(1)"
-              variant="dark"
-              v-text="'>'"
-            />
-            <b-button
-              class="mx-1"
-              :disabled="video.framerate == 0"
+              :disabled="!video.framerate"
               @click="skipFrames(video.framerate)"
               variant="dark"
               v-text="'>>'"
@@ -184,6 +172,8 @@ export default {
     },
     options(newOptions, oldOptions) {
       this.player.src(newOptions.sources[0]);
+      this.values = [0, 0];
+      this.cuts = [];
     },
     values(newValues, oldValues) {
       if (newValues[0] > newValues[1]) {
