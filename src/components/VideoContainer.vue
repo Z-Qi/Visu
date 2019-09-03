@@ -67,7 +67,7 @@
             <b-button
               class="mx-auto"
               :disabled="cuts.length < 1"
-              @click="generateSummary"
+              @click="generateSummaryDialog"
               variant="dark"
               v-text="'Generate Summary'"
             />
@@ -108,6 +108,8 @@ import { setInterval, clearInterval } from 'timers';
 import * as path from 'path';
 
 import Video from '../util/video';
+import { generateSummary } from '../util/generate_summary';
+const { dialog, app } = require('electron').remote;
 
 export default {
   name: 'VideoContainer',
@@ -195,17 +197,19 @@ export default {
   },
   methods: {
     async loadVideo() {
-      this.video = new Video(this.$refs.videoInput.files[0].path);
-      this.features = {};
-      this.options = Object.assign({}, this.options, {
-        sources: [
-          {
-            src: URL.createObjectURL(this.$refs.videoInput.files[0]),
-            type: this.$refs.videoInput.files[0].type,
-          },
-        ],
-      });
-      this.updateFramerate();
+      if (this.$refs.videoInput.files[0]) {
+        this.video = new Video(this.$refs.videoInput.files[0].path);
+        this.features = {};
+        this.options = Object.assign({}, this.options, {
+          sources: [
+            {
+              src: URL.createObjectURL(this.$refs.videoInput.files[0]),
+              type: this.$refs.videoInput.files[0].type,
+            },
+          ],
+        });
+        this.updateFramerate();
+      }
     },
     updateFramerate() {
       let ffmpeg = spawn(
@@ -273,14 +277,19 @@ export default {
         end: this.values[1],
       });
     },
-    generateSummary() {
-      let summary = '|';
+    generateSummaryDialog() {
+      dialog.showSaveDialog(null, { defaultPath: app.getPath('documents') }, summaryPath => {
+        const cutTimes = this.cuts.map(cut => {
+          return {
+            start: cut.start / this.video.framerate,
+            end: cut.end / this.video.framerate,
+          };
+        });
 
-      for (let cut of this.cuts) {
-        summary += cut.start + ':' + cut.end + '|';
-      }
-
-      console.log(summary);
+        if (summaryPath) {
+          generateSummary(cutTimes, this.video.path, summaryPath);
+        }
+      });
     },
   },
 };
