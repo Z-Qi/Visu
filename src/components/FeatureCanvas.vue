@@ -1,16 +1,66 @@
 <template>
-  <div>
-    <b-form-select v-model="filter" :options="options" multiple :select-size="4"></b-form-select>
-    <b-button id="filter-btn" variant="outline-primary" @click="addNewFilter()">Add filter</b-button>
-    <div id="stage" ref="stage" />
-  </div>
+  <b-container fluid>
+    <b-row align-v="stretch" no-gutters>
+      <b-col cols="10" class="mr-4">
+        <multiselect
+          v-model="filter"
+          :options="options"
+          :multiple="true"
+          :close-on-select="false"
+          :searchable="false"
+          :show-labels="false"
+          placeholder="Select filters"
+        ></multiselect>
+      </b-col>
+      <b-button
+        class="flex-grow-1"
+        variant="outline-primary"
+        @click="addNewFilter()"
+        :disabled="filter.length === 0"
+      >Add Filters</b-button>
+    </b-row>
+    <b-container fluid>
+      <b-row class="mt-2" v-for="(f, i) in shownFilters" :key="f.filters">
+        <b-col class="py-1 text-black bg-light rounded border-bottom" cols="auto">
+          Contains a
+          <span v-for="(val, j) in f.filter" :key="val">
+            <span>
+              <b>{{val}}</b>
+            </span>
+            <span v-if="j < f.filter.length - 1">,&nbsp;</span>
+            <span v-if="j == f.filter.length - 2">and&nbsp;</span>
+          </span>
+          <button
+            type="button"
+            class="ml-2 close"
+            aria-label="Close"
+            @click="removeFilter(shownFilters.length - i)"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </b-col>
+      </b-row>
+    </b-container>
+    <b-row>
+      <b-col>
+        <div id="stage" ref="stage" />
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
 import Konva from 'konva';
-import { BFormSelect, BButton } from 'bootstrap-vue';
+import { BButton, BContainer, BRow } from 'bootstrap-vue';
+import Multiselect from 'vue-multiselect';
 
 export default {
+  components: {
+    BButton,
+    BContainer,
+    BRow,
+    Multiselect,
+  },
   props: {
     images: {
       type: Array,
@@ -32,6 +82,14 @@ export default {
       options: [],
       indexMap: new Map(),
     };
+  },
+  computed: {
+    shownFilters: function() {
+      return this.filterRows
+        .filter(r => r.filter.length > 0)
+        .slice()
+        .reverse();
+    },
   },
   watch: {
     images(newImages, oldImages) {
@@ -138,8 +196,8 @@ export default {
             const rightStageEdge = (this.stage.width() - this.stage.position().x) / this.stage.scaleX();
 
             if (x <= leftStageEdge) {
-              x = leftStageEdge
-            } else if ((x + size.width) >= rightStageEdge) {
+              x = leftStageEdge;
+            } else if (x + size.width >= rightStageEdge) {
               x = rightStageEdge - size.width;
             }
 
@@ -203,14 +261,21 @@ export default {
         filter: filter,
         images: this.images.filter(img => filter.every(val => img.objects.includes(val))),
       });
+      this.filter = [];
     },
     addNewFilter() {
       this.addFilter(this.filter);
       this.drawImages();
     },
+    async removeFilter(index) {
+      this.filterRows.splice(index, 1);
+      await this.drawImages();
+    },
   },
 };
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style scoped>
 #stage {
@@ -218,11 +283,25 @@ export default {
   padding: 10px;
   border: 2px solid #007bff;
   border-radius: 8px;
-  margin: 10px;
+  margin-top: 10px;
   cursor: pointer;
 }
 
-#filter-btn {
-  margin-top: 10px;
+.multiselect {
+  min-height: 43px !important;
+}
+</style>
+
+<style>
+.multiselect__option--highlight, .multiselect__tag {
+  background: var(--primary) !important;
+}
+
+.multiselect__tag-icon:hover {
+  background: #0056b3;
+}
+
+.multiselect__tag-icon::after {
+  color: white;
 }
 </style>
