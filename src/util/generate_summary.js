@@ -1,18 +1,18 @@
 import { exec } from 'child_process';
 
-export async function generateSummary(cuts, inputVideo, outputVideo) {
+export async function generateSummary(snippets, inputVideo, outputVideo) {
   let trims = '';
   let concat = '';
 
-  for (const i in cuts) {
-    let cut = cuts[i];
-    trims += `[0:v]trim=${cut.start}:${cut.end},setpts=PTS-STARTPTS[v${i}];`;
-    trims += `[0:a]atrim=${cut.start}:${cut.end},asetpts=PTS-STARTPTS[a${i}];`;
+  for (const i in snippets) {
+    let snippet = snippets[i];
+    trims += `[0:v]trim=${snippet.start}:${snippet.end},setpts=PTS-STARTPTS[v${i}];`;
+    trims += `[0:a]atrim=${snippet.start}:${snippet.end},asetpts=PTS-STARTPTS[a${i}];`;
 
     concat += `[v${i}][a${i}]`;
   }
 
-  concat += `concat=n=${cuts.length}:v=1:a=1[v][a]`;
+  concat += `concat=n=${snippets.length}:v=1:a=1[v][a]`;
 
   let filter = `"${trims}${concat}"`;
 

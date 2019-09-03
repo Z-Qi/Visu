@@ -53,33 +53,33 @@
         </b-row>
       </b-col>
       <b-col data-simplebar class="scrollable" cols="4">
-        <draggable :list="cuts" draggable=".item">
-          <b-row class="list-item item" v-for="cut in cuts" :key="cut.start + cut.end" style="text-align: start;">
+        <draggable :list="snippets" draggable=".item">
+          <b-row class="list-item item" v-for="snippet in snippets" :key="snippet.start + snippet.end" style="text-align: start;">
             <b-col cols="6">
               <b-row no-gutters>
                 <b-col cols="7"> First Frame:<br />Final Frame: </b-col>
-                <b-col cols="5">{{ cut.start }}<br />{{ cut.end }}</b-col>
+                <b-col cols="5">{{ snippet.start }}<br />{{ snippet.end }}</b-col>
               </b-row>
             </b-col>
             <b-col cols="6">
-              Time:&emsp;{{ (cut.start / video.framerate).toFixed(2) }} s
+              Time:&emsp;{{ (snippet.start / video.framerate).toFixed(2) }} s
               <br />
-              Time:&emsp;{{ (cut.end / video.framerate).toFixed(2) }} s
+              Time:&emsp;{{ (snippet.end / video.framerate).toFixed(2) }} s
             </b-col>
           </b-row>
           <b-row slot="header" class="list-item header">
             <b-button
               class="mx-auto"
               :disabled="
-                cuts.some(c => c.start == values[0] && c.end == values[1]) || dragging || values[0] == values[1]
+                snippets.some(c => c.start == values[0] && c.end == values[1]) || dragging || values[0] == values[1]
               "
-              @click="addCut"
+              @click="addSnippet"
               variant="dark"
-              v-text="'Add Cut'"
+              v-text="'Add Snippet'"
             />
             <b-button
               class="mx-auto"
-              :disabled="cuts.length < 1"
+              :disabled="snippets.length < 1"
               @click="generateSummaryDialog"
               variant="dark"
               v-text="'Generate Summary'"
@@ -161,7 +161,7 @@ export default {
       },
       currentSliderIndex: 0,
       dragging: false,
-      cuts: [],
+      snippets: [],
     };
   },
   mounted() {
@@ -188,7 +188,7 @@ export default {
     options(newOptions, oldOptions) {
       this.player.src(newOptions.sources[0]);
       this.values = [0, 0];
-      this.cuts = [];
+      this.snippets = [];
     },
     values(newValues, oldValues) {
       if (newValues[0] > newValues[1]) {
@@ -283,24 +283,24 @@ export default {
     setCurrent(index) {
       this.currentSliderIndex = index;
     },
-    validCut() {},
-    addCut() {
-      this.cuts.splice(this.cuts.length, 0, {
+    validSnippet() {},
+    addSnippet() {
+      this.snippets.splice(this.snippets.length, 0, {
         start: this.values[0],
         end: this.values[1],
       });
     },
     generateSummaryDialog() {
       dialog.showSaveDialog(null, { defaultPath: app.getPath('documents') }, summaryPath => {
-        const cutTimes = this.cuts.map(cut => {
+        const snippetTimes = this.snippets.map(snippet => {
           return {
-            start: cut.start / this.video.framerate,
-            end: cut.end / this.video.framerate,
+            start: snippet.start / this.video.framerate,
+            end: snippet.end / this.video.framerate,
           };
         });
 
         if (summaryPath) {
-          generateSummary(cutTimes, this.video.path, summaryPath);
+          generateSummary(snippetTimes, this.video.path, summaryPath);
         }
       });
     },
@@ -322,8 +322,9 @@ export default {
 }
 
 .header {
-  position: sticky;
+  position: sticky !important;
   top: 0px;
+  z-index: 1;
 }
 
 .list-item {
