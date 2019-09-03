@@ -7,14 +7,16 @@ export async function generateSummary(cuts, inputVideo, outputVideo) {
   for (const i in cuts) {
     let cut = cuts[i];
     trims += `[0:v]trim=${cut.start}:${cut.end},setpts=PTS-STARTPTS[v${i}];`;
-    concat += `[v${i}]`;
+    trims += `[0:a]atrim=${cut.start}:${cut.end},asetpts=PTS-STARTPTS[a${i}];`;
+
+    concat += `[v${i}][a${i}]`;
   }
 
-  concat += `concat=n=${cuts.length}:v=1:a=0[out]`;
+  concat += `concat=n=${cuts.length}:v=1:a=1[v][a]`;
 
   let filter = `"${trims}${concat}"`;
 
-  exec(`ffmpeg -i ${inputVideo} -filter_complex ${filter} -map "[out]" ${outputVideo} -y`, (err, out) => {
+  exec(`ffmpeg -i ${inputVideo} -filter_complex ${filter} -map "[v]" -map "[a]" ${outputVideo} -y`, (err, out) => {
     if (err) {
       console.log(err);
     } else {
