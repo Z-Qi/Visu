@@ -1,7 +1,7 @@
 <template>
   <b-container fluid>
     <b-row>
-      <b-col cols="4">
+      <b-col cols="3">
         <b-row>
           <b-col>
             <video
@@ -52,9 +52,22 @@
           </b-col>
         </b-row>
       </b-col>
-      <b-col cols="4">
-        <draggable :list="cuts">
-          <b-row slot="header" class="list-item">
+      <b-col data-simplebar class="scrollable" cols="4">
+        <draggable :list="cuts" draggable=".item">
+          <b-row class="list-item item" v-for="cut in cuts" :key="cut.start + cut.end" style="text-align: start;">
+            <b-col cols="6">
+              <b-row no-gutters>
+                <b-col cols="7"> First Frame:<br />Final Frame: </b-col>
+                <b-col cols="5">{{ cut.start }}<br />{{ cut.end }}</b-col>
+              </b-row>
+            </b-col>
+            <b-col cols="6">
+              Time:&emsp;{{ (cut.start / video.framerate).toFixed(2) }} s
+              <br />
+              Time:&emsp;{{ (cut.end / video.framerate).toFixed(2) }} s
+            </b-col>
+          </b-row>
+          <b-row slot="header" class="list-item header">
             <b-button
               class="mx-auto"
               :disabled="
@@ -67,14 +80,11 @@
             <b-button
               class="mx-auto"
               :disabled="cuts.length < 1"
-              @click="generateSummary"
+              @click="generateSummaryDialog"
               variant="dark"
               v-text="'Generate Summary'"
             />
           </b-row>
-          <b-row class="list-item" v-for="cut in cuts" :key="cut.start + cut.end"
-            >Start: {{ cut.start }}<br />End: {{ cut.end }}</b-row
-          >
         </draggable>
       </b-col>
       <b-col cols="4">
@@ -103,11 +113,16 @@ import 'vue-slider-component/theme/antd.css';
 
 import Draggable from 'vuedraggable';
 
+import 'simplebar';
+import 'simplebar/dist/simplebar.css';
+
 import { spawn } from 'child_process';
 import { setInterval, clearInterval } from 'timers';
 import * as path from 'path';
 
 import Video from '../util/video';
+import { generateSummary } from '../util/generate_summary';
+const { dialog, app } = require('electron').remote;
 
 export default {
   name: 'VideoContainer',
@@ -195,17 +210,19 @@ export default {
   },
   methods: {
     async loadVideo() {
-      this.video = new Video(this.$refs.videoInput.files[0].path);
-      this.features = {};
-      this.options = Object.assign({}, this.options, {
-        sources: [
-          {
-            src: URL.createObjectURL(this.$refs.videoInput.files[0]),
-            type: this.$refs.videoInput.files[0].type,
-          },
-        ],
-      });
-      this.updateFramerate();
+      if (this.$refs.videoInput.files[0]) {
+        this.video = new Video(this.$refs.videoInput.files[0].path);
+        this.features = {};
+        this.options = Object.assign({}, this.options, {
+          sources: [
+            {
+              src: URL.createObjectURL(this.$refs.videoInput.files[0]),
+              type: this.$refs.videoInput.files[0].type,
+            },
+          ],
+        });
+        this.updateFramerate();
+      }
     },
     updateFramerate() {
       let ffmpeg = spawn(
@@ -273,14 +290,19 @@ export default {
         end: this.values[1],
       });
     },
-    generateSummary() {
-      let summary = '|';
+    generateSummaryDialog() {
+      dialog.showSaveDialog(null, { defaultPath: app.getPath('documents') }, summaryPath => {
+        const cutTimes = this.cuts.map(cut => {
+          return {
+            start: cut.start / this.video.framerate,
+            end: cut.end / this.video.framerate,
+          };
+        });
 
-      for (let cut of this.cuts) {
-        summary += cut.start + ':' + cut.end + '|';
-      }
-
-      console.log(summary);
+        if (summaryPath) {
+          generateSummary(cutTimes, this.video.path, summaryPath);
+        }
+      });
     },
   },
 };
@@ -293,6 +315,15 @@ export default {
 
 .video-js .vjs-big-play-button {
   display: none;
+}
+
+.scrollable {
+  max-height: 375px;
+}
+
+.header {
+  position: sticky;
+  top: 0px;
 }
 
 .list-item {

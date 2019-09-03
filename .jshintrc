@@ -5,6 +5,7 @@
   "globals": {
     "process": true,
     "require": true,
-    "window": true
+    "window": true,
+    "console": true
   }
 }

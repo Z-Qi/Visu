@@ -8,22 +8,20 @@
       </b-row>
 
       <b-row class="m-4" no-gutters>
-        <b-col data-simplebar class="scrollable" cols="12">
-          <div>
-            <b-tabs pills card>
-              <b-tab title="Visualisation" active>
-                <b-spinner v-if="video && !features.processedFrames" variant="primary"></b-spinner>
-                <feature-canvas
-                  v-if="features.processedFrames"
-                  :images="features.processedFrames"
-                  :resolution="video.resolution"
-                ></feature-canvas>
-              </b-tab>
-              <b-tab title="Keyframes" v-if="features.processedFrames">
-                <video-feature-container :features="features" />
-              </b-tab>
-            </b-tabs>
-          </div>
+        <b-col cols="12">
+          <b-tabs pills card>
+            <b-tab title="Visualisation" active>
+              <b-spinner v-if="video && !features.processedFrames" variant="primary"></b-spinner>
+              <feature-canvas
+                v-if="features.processedFrames"
+                :images="features.processedFrames"
+                :resolution="video.resolution"
+              ></feature-canvas>
+            </b-tab>
+            <b-tab title="Keyframes" v-if="features.processedFrames" data-simplebar class="scrollable">
+              <video-feature-container :features="features" />
+            </b-tab>
+          </b-tabs>
         </b-col>
       </b-row>
     </b-container>
@@ -105,7 +103,7 @@ export default {
 }
 
 .scrollable {
-  height: 100%;
+  max-height: 575px;
   overflow-x: auto;
 }
 </style>
