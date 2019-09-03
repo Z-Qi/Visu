@@ -1,7 +1,7 @@
 <template>
   <b-container fluid>
     <b-row>
-      <b-col cols="4">
+      <b-col cols="3">
         <b-row>
           <b-col>
             <video
@@ -52,9 +52,22 @@
           </b-col>
         </b-row>
       </b-col>
-      <b-col cols="4">
-        <draggable :list="cuts">
-          <b-row slot="header" class="list-item">
+      <b-col data-simplebar class="scrollable" cols="4">
+        <draggable :list="cuts" draggable=".item">
+          <b-row class="list-item item" v-for="cut in cuts" :key="cut.start + cut.end" style="text-align: start;">
+            <b-col cols="6">
+              <b-row no-gutters>
+                <b-col cols="7"> First Frame:<br />Final Frame: </b-col>
+                <b-col cols="5">{{ cut.start }}<br />{{ cut.end }}</b-col>
+              </b-row>
+            </b-col>
+            <b-col cols="6">
+              Time:&emsp;{{ (cut.start / video.framerate).toFixed(2) }} s
+              <br />
+              Time:&emsp;{{ (cut.end / video.framerate).toFixed(2) }} s
+            </b-col>
+          </b-row>
+          <b-row slot="header" class="list-item header">
             <b-button
               class="mx-auto"
               :disabled="
@@ -72,9 +85,6 @@
               v-text="'Generate Summary'"
             />
           </b-row>
-          <b-row class="list-item" v-for="cut in cuts" :key="cut.start + cut.end"
-            >Start: {{ cut.start }}<br />End: {{ cut.end }}</b-row
-          >
         </draggable>
       </b-col>
       <b-col cols="4">
@@ -102,6 +112,9 @@ import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 
 import Draggable from 'vuedraggable';
+
+import 'simplebar';
+import 'simplebar/dist/simplebar.css';
 
 import { spawn } from 'child_process';
 import { setInterval, clearInterval } from 'timers';
@@ -302,6 +315,15 @@ export default {
 
 .video-js .vjs-big-play-button {
   display: none;
+}
+
+.scrollable {
+  max-height: 375px;
+}
+
+.header {
+  position: sticky;
+  top: 0px;
 }
 
 .list-item {
