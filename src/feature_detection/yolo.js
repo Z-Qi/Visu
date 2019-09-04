@@ -3,7 +3,12 @@ import * as url from 'url';
 
 export async function detectObjectsInFrames(frames) {
   const detectedObjects = await runObjectDetection(frames);
-  return frames.map((f, i) => Object.assign({}, f, detectedObjects[i]));
+  return frames.map((f, i) =>
+    Object.assign({}, f, {
+      objects: detectedObjects[i].objects,
+      objectSrc: `${url.pathToFileURL(detectedObjects[i].objectSrc)}?time=${Date.now()}`,
+    })
+  );
 }
 
 function runObjectDetection(frames) {
