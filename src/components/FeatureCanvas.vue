@@ -21,7 +21,11 @@
     </b-row>
     <b-container fluid>
       <b-row class="mt-2" v-for="(f, i) in shownFilters" :key="f.filters">
-        <b-col class="py-1 text-black bg-light rounded border-bottom" cols="auto">
+        <b-col
+          class="py-1 text-black rounded border-bottom"
+          cols="auto"
+          :style="`background: ${f.background}`"
+        >
           <span class="filter-badge" @click="() => navigateToRow(f)">
             Contains a
             <span v-for="(val, j) in f.filter" :key="val">
@@ -82,6 +86,7 @@ export default {
       filter: [],
       filterRows: [],
       options: [],
+      colors: [],
       indexMap: new Map(),
     };
   },
@@ -108,11 +113,11 @@ export default {
       draggable: true,
     });
 
-    this.linkLayer = new Konva.Layer();
     this.imageLayer = new Konva.Layer();
+    this.linkLayer = new Konva.Layer();
     this.overlayLayer = new Konva.Layer();
-    this.stage.add(this.linkLayer);
     this.stage.add(this.imageLayer);
+    this.stage.add(this.linkLayer);
     this.stage.add(this.overlayLayer);
 
     this.stage.on('wheel', e => {
@@ -149,8 +154,6 @@ export default {
   },
   methods: {
     async updateImages() {
-      this.filterRows = [];
-      this.addFilter([]);
       this.options = [];
       this.indexMap = new Map();
 
@@ -163,8 +166,15 @@ export default {
       }
 
       this.options = [...new Set(this.options)];
+
       this.stage.scale({ x: 0.3, y: 0.3 });
-      this.stage.position({ x: 0, y: this.stage.height() / 2 });
+      this.stage.position({ x: 50, y: this.stage.height() / 2 });
+
+      this.colors = ['#ffffff', '#ff6b88', '#f9dc5c', '#c2eabd', '#66adff', '#ffbb63'];
+
+      this.filterRows = [];
+      this.addFilter([]);
+
       await this.drawImages();
     },
     async drawImages() {
@@ -176,6 +186,7 @@ export default {
       for (const i in this.filterRows) {
         const images = this.filterRows[i].images;
         this.filterRows[i].canvasImages = [];
+
         for (const j in images) {
           const konvaImage = new Konva.Image({
             x: (75 + width) * this.indexMap.get(images[j].src),
@@ -183,6 +194,10 @@ export default {
             width: width,
             height: height,
             image: await this.loadImage(images[j].src),
+            shadowColor: '#000',
+            shadowBlur: 14,
+            shadowOffset: { x: 0, y: 13 },
+            shadowOpacity: 0.4,
           });
 
           konvaImage.on('mouseenter', () => {
@@ -229,6 +244,18 @@ export default {
           this.filterRows[i].canvasImages.push(konvaImage);
           this.imageLayer.add(konvaImage);
         }
+
+        const backgroundPadding = 50;
+        const rowBackground = new Konva.Rect({
+          x: this.filterRows[i].canvasImages[0].x() - backgroundPadding / 2,
+          y: y - i * 300 - backgroundPadding / 2,
+          width: (width + 75) * images.length - 75 + backgroundPadding,
+          height: height + backgroundPadding,
+          fill: this.filterRows[i].background,
+          cornerRadius: 15,
+        });
+        this.imageLayer.add(rowBackground);
+        rowBackground.moveToBottom();
       }
       this.imageLayer.draw();
       this.linkImages();
@@ -245,8 +272,8 @@ export default {
             points: points,
             pointerLength: 15,
             pointerWidth: 15,
-            stroke: '#007bff',
-            fill: '#007bff',
+            stroke: '#000000',
+            fill: '#000000',
           });
           this.linkLayer.add(link);
         }
@@ -263,9 +290,11 @@ export default {
       });
     },
     addFilter(filter) {
+      // todo: check for duplicate filters (order doesn't matter)
       this.filterRows.push({
         filter: filter,
         images: this.images.filter(img => filter.every(val => img.objects.includes(val))),
+        background: this.colors[this.filterRows.length],
       });
       this.filter = [];
     },
