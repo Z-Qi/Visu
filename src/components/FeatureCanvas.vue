@@ -9,12 +9,13 @@
           :close-on-select="false"
           :searchable="false"
           :show-labels="false"
-          placeholder="Select filters"
+          :placeholder="filterRows.length < colors.length ? 'Select filters' : 'Can\'t add more filters'"
+          :disabled="filterRows.length == colors.length"
         ></multiselect>
       </b-col>
       <b-button
         class="flex-grow-1"
-        variant="outline-primary"
+        variant="primary"
         @click="addNewFilter()"
         :disabled="filter.length === 0"
       >Add Filters</b-button>
