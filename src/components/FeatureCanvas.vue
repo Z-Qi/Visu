@@ -185,8 +185,9 @@ export default {
       const y = height;
 
       for (const i in this.filterRows) {
-        const images = this.filterRows[i].images;
-        this.filterRows[i].canvasImages = [];
+        const row = this.filterRows[i];
+        const images = row.images;
+        row.canvasImages = [];
 
         for (const j in images) {
           const konvaImage = new Konva.Image({
@@ -242,19 +243,21 @@ export default {
             this.$emit('frame-clicked', images[j]);
           });
 
-          this.filterRows[i].canvasImages.push(konvaImage);
+          row.canvasImages.push(konvaImage);
           this.imageLayer.add(konvaImage);
         }
 
         const backgroundPadding = 50;
+        const backgroundWidth = row.canvasImages[row.canvasImages.length - 1].x() - row.canvasImages[0].x() + width;
         const rowBackground = new Konva.Rect({
-          x: this.filterRows[i].canvasImages[0].x() - backgroundPadding / 2,
+          x: row.canvasImages[0].x() - backgroundPadding / 2,
           y: y - i * 300 - backgroundPadding / 2,
-          width: (width + 75) * images.length - 75 + backgroundPadding,
+          width: backgroundWidth + backgroundPadding,
           height: height + backgroundPadding,
-          fill: this.filterRows[i].background,
+          fill: row.background,
           cornerRadius: 15,
         });
+
         this.imageLayer.add(rowBackground);
         rowBackground.moveToBottom();
       }
