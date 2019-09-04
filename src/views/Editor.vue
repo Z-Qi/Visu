@@ -16,6 +16,7 @@
                 v-if="features.processedFrames"
                 :images="features.processedFrames"
                 :resolution="video.resolution"
+                @frame-clicked="onFrameClicked"
               ></feature-canvas>
             </b-tab>
             <b-tab title="Keyframes" v-if="features.processedFrames" data-simplebar class="scrollable">
@@ -75,6 +76,7 @@ export default {
     async updateData(video) {
       console.log(video);
       this.video = video;
+      this.features = {};
       await this.processVideo();
     },
     async processVideo() {
@@ -88,6 +90,9 @@ export default {
         processedFrames: processedFrames,
       };
     },
+    onFrameClicked(frame) {
+      this.$refs.videoContainer.seek(frame.timestamp);
+    }
   },
 };
 </script>

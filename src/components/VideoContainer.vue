@@ -33,7 +33,13 @@
               variant="dark"
               v-text="'<<'"
             />
-            <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(-1)" variant="dark" v-text="'<'" />
+            <b-button
+              class="mx-1"
+              :disabled="!video.framerate"
+              @click="skipFrames(-1)"
+              variant="dark"
+              v-text="'<'"
+            />
             <b-button
               class="mx-1 flex-grow-1"
               :disabled="!video.framerate"
@@ -41,7 +47,13 @@
               variant="dark"
               v-text="playing ? 'Pause' : 'Play'"
             />
-            <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(1)" variant="dark" v-text="'>'" />
+            <b-button
+              class="mx-1"
+              :disabled="!video.framerate"
+              @click="skipFrames(1)"
+              variant="dark"
+              v-text="'>'"
+            />
             <b-button
               class="mx-1"
               :disabled="!video.framerate"
@@ -54,11 +66,23 @@
       </b-col>
       <b-col data-simplebar class="scrollable" cols="4">
         <draggable :list="snippets" draggable=".item">
-          <b-row class="list-item item" v-for="snippet in snippets" :key="snippet.start + snippet.end" style="text-align: start;">
+          <b-row
+            class="list-item item"
+            v-for="snippet in snippets"
+            :key="snippet.start + snippet.end"
+            style="text-align: start;"
+          >
             <b-col cols="6">
               <b-row no-gutters>
-                <b-col cols="7"> First Frame:<br />Final Frame: </b-col>
-                <b-col cols="5">{{ snippet.start }}<br />{{ snippet.end }}</b-col>
+                <b-col cols="7">
+                  First Frame:
+                  <br />Final Frame:
+                </b-col>
+                <b-col cols="5">
+                  {{ snippet.start }}
+                  <br />
+                  {{ snippet.end }}
+                </b-col>
               </b-row>
             </b-col>
             <b-col cols="6">
@@ -234,7 +258,7 @@ export default {
           '|',
           'sed',
           '-n',
-          '"s/.*, \\\(.*\\\) fp.*/\\1/p"',
+          '"s/.*, \\(.*\\) fp.*/\\1/p"',
         ],
         {
           shell: true,
@@ -279,6 +303,10 @@ export default {
       let time = this.player.currentTime();
       this.player.currentTime(time + frames / this.video.framerate);
       this.values.splice(this.currentSliderIndex, 1, (this.values[this.currentSliderIndex] += frames));
+    },
+    seek(timestamp) {
+      this.player.currentTime(timestamp);
+      this.values.splice(0, 1, timestamp * this.video.framerate);
     },
     setCurrent(index) {
       this.currentSliderIndex = index;

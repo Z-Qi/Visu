@@ -22,13 +22,15 @@
     <b-container fluid>
       <b-row class="mt-2" v-for="(f, i) in shownFilters" :key="f.filters">
         <b-col class="py-1 text-black bg-light rounded border-bottom" cols="auto">
-          Contains a
-          <span v-for="(val, j) in f.filter" :key="val">
-            <span>
-              <b>{{val}}</b>
+          <span class="filter-badge" @click="() => navigateToRow(f)">
+            Contains a
+            <span v-for="(val, j) in f.filter" :key="val">
+              <span>
+                <b>{{val}}</b>
+              </span>
+              <span v-if="j < f.filter.length - 1">,&nbsp;</span>
+              <span v-if="j == f.filter.length - 2">and&nbsp;</span>
             </span>
-            <span v-if="j < f.filter.length - 1">,&nbsp;</span>
-            <span v-if="j == f.filter.length - 2">and&nbsp;</span>
           </span>
           <button
             type="button"
@@ -43,7 +45,7 @@
     </b-container>
     <b-row>
       <b-col>
-        <div id="stage" ref="stage" />
+        <div id="stage" ref="stage" class="rounded border" />
       </b-col>
     </b-row>
   </b-container>
@@ -98,10 +100,11 @@ export default {
   },
   mounted() {
     const stageStyle = window.getComputedStyle(this.$refs.stage);
+    const stageHeight = window.innerHeight / 2;
     this.stage = new Konva.Stage({
       container: 'stage',
       width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
-      height: window.innerHeight / 2,
+      height: stageHeight,
       draggable: true,
     });
 
@@ -137,7 +140,7 @@ export default {
     window.addEventListener('resize', () => {
       this.stage.size({
         width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
-        height: window.innerHeight / 2,
+        height: stageHeight,
       });
       this.stage.batchDraw();
     });
@@ -160,7 +163,7 @@ export default {
       }
 
       this.options = [...new Set(this.options)];
-      this.stage.scale({ x: 0.2, y: 0.2 });
+      this.stage.scale({ x: 0.3, y: 0.3 });
       this.stage.position({ x: 0, y: this.stage.height() / 2 });
       await this.drawImages();
     },
@@ -175,7 +178,7 @@ export default {
         this.filterRows[i].canvasImages = [];
         for (const j in images) {
           const konvaImage = new Konva.Image({
-            x: 0 + (75 + width) * this.indexMap.get(images[j].src),
+            x: (75 + width) * this.indexMap.get(images[j].src),
             y: y - i * 300,
             width: width,
             height: height,
@@ -218,6 +221,9 @@ export default {
           konvaImage.on('mouseout', () => {
             this.overlayLayer.removeChildren();
             this.overlayLayer.draw();
+          });
+          konvaImage.on('click', () => {
+            this.$emit('frame-clicked', images[j]);
           });
 
           this.filterRows[i].canvasImages.push(konvaImage);
@@ -267,6 +273,13 @@ export default {
       this.addFilter(this.filter);
       this.drawImages();
     },
+    navigateToRow(row) {
+      this.stage.position({
+        x: row.canvasImages[0].x() * this.stage.scaleX(),
+        y: -row.canvasImages[0].y() * this.stage.scaleY() + this.stage.height() / 2,
+      });
+      this.stage.batchDraw();
+    },
     async removeFilter(index) {
       this.filterRows.splice(index, 1);
       await this.drawImages();
@@ -281,8 +294,6 @@ export default {
 #stage {
   width: 100%;
   padding: 10px;
-  border: 2px solid #007bff;
-  border-radius: 8px;
   margin-top: 10px;
   cursor: pointer;
 }
@@ -290,10 +301,15 @@ export default {
 .multiselect {
   min-height: 43px !important;
 }
+
+.filter-badge {
+  cursor: pointer;
+}
 </style>
 
 <style>
-.multiselect__option--highlight, .multiselect__tag {
+.multiselect__option--highlight,
+.multiselect__tag {
   background: var(--primary) !important;
 }
 
