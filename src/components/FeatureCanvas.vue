@@ -166,7 +166,7 @@ export default {
         }
       }
 
-      this.options = [...new Set(this.options)];
+      this.options = [...new Set(this.options)].sort();
 
       this.stage.scale({ x: 0.3, y: 0.3 });
       this.stage.position({ x: 50, y: this.stage.height() / 2 });
@@ -308,7 +308,7 @@ export default {
     },
     navigateToRow(row) {
       this.stage.position({
-        x: row.canvasImages[0].x() * this.stage.scaleX(),
+        x: -row.canvasImages[0].x() * this.stage.scaleX(),
         y: -row.canvasImages[0].y() * this.stage.scaleY() + this.stage.height() / 2,
       });
       this.stage.batchDraw();
