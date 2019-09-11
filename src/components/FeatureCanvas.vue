@@ -106,10 +106,11 @@ export default {
   },
   mounted() {
     const stageStyle = window.getComputedStyle(this.$refs.stage);
+    const stageWidth = this.$refs.stage.clientWidth;
     const stageHeight = window.innerHeight / 2;
     this.stage = new Konva.Stage({
       container: 'stage',
-      width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
+      width: stageWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
       height: stageHeight,
       draggable: true,
     });
@@ -143,13 +144,13 @@ export default {
       this.stage.batchDraw();
     });
 
-    window.addEventListener('resize', () => {
+    new ResizeObserver(() => {
       this.stage.size({
         width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
         height: stageHeight,
       });
       this.stage.batchDraw();
-    });
+    }).observe(this.$refs.stage);
 
     this.updateImages();
   },

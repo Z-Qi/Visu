@@ -19,7 +19,24 @@
                 @frame-clicked="onFrameClicked"
               ></feature-canvas>
             </b-tab>
-            <b-tab title="Keyframes" v-if="features.processedFrames" data-simplebar class="scrollable">
+            <b-tab title="Clustering">
+              <b-spinner
+                v-if="video && !features.clusteredImages"
+                variant="primary"
+              ></b-spinner>
+              <cluster-canvas
+                v-if="features.clusteredImages"
+                :images="features.clusteredImages"
+                :resolution="video.resolution"
+                @frame-clicked="onFrameClicked"
+              ></cluster-canvas>
+            </b-tab>
+            <b-tab
+              title="Keyframes"
+              v-if="features.processedFrames"
+              data-simplebar
+              class="scrollable"
+            >
               <video-feature-container :features="features" />
             </b-tab>
           </b-tabs>
@@ -34,12 +51,14 @@ import VideoContainer from '../components/VideoContainer';
 import VideoFeatureContainer from '../components/VideoFeatureContainer';
 import DetectedObjectsContainer from '../components/DetectedObjectsContainer';
 import FeatureCanvas from '../components/FeatureCanvas';
+import ClusterCanvas from '../components/ClusterCanvas';
 import { BContainer, BRow, BCol, BTabs, BTab, BButton, BFormFile, BSpinner } from 'bootstrap-vue';
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 
 import { detectObjects, detectObjectsInFrames } from '../feature_detection/yolo';
 import { extractKeyframes, getShotBoundaryInfo } from '../feature_detection/keyframes';
+import { getClusteredImages } from '../feature_detection/clustering';
 import { extractFrames } from '../util/extract_frames';
 import * as util from '../feature_detection/util';
 import { spawn } from 'child_process';
@@ -53,6 +72,7 @@ export default {
     VideoContainer,
     VideoFeatureContainer,
     DetectedObjectsContainer,
+    ClusterCanvas,
     FeatureCanvas,
     BContainer,
     BRow,
@@ -84,15 +104,17 @@ export default {
       // todo: add option to use other other frames
       // todo: figure out what to do with sbd info
       const processedFrames = await detectObjectsInFrames(extractedKeyframes);
+      const clusteredImages = await getClusteredImages(processedFrames);
       // const processedFrames = extractedKeyframes;
       this.features = {
         keyframes: extractedKeyframes,
         processedFrames: processedFrames,
+        clusteredImages: clusteredImages
       };
     },
     onFrameClicked(frame) {
       this.$refs.videoContainer.seek(frame.timestamp);
-    }
+    },
   },
 };
 </script>
