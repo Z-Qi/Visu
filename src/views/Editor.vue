@@ -1,14 +1,11 @@
 <template>
-  <div class="h-100">
-    <b-container fluid class="h-100">
-      <b-row class="m-4" no-gutters>
-        <b-col>
+  <div>
+    <b-container fluid>
+      <b-row class="my-4" no-gutters>
+        <b-col cols="3">
           <video-container ref="videoContainer" @metadata-loaded="updateData"></video-container>
         </b-col>
-      </b-row>
-
-      <b-row class="m-4" no-gutters>
-        <b-col cols="12">
+        <b-col cols="9">
           <b-tabs pills card>
             <b-tab title="Visualisation" active>
               <b-spinner v-if="video && !features.processedFrames" variant="primary"></b-spinner>
@@ -20,10 +17,7 @@
               ></feature-canvas>
             </b-tab>
             <b-tab title="Clustering">
-              <b-spinner
-                v-if="video && !features.clusteredImages"
-                variant="primary"
-              ></b-spinner>
+              <b-spinner v-if="video && !features.clusteredImages" variant="primary"></b-spinner>
               <cluster-canvas
                 v-if="features.clusteredImages"
                 :images="features.clusteredImages"
@@ -31,12 +25,7 @@
                 @frame-clicked="onFrameClicked"
               ></cluster-canvas>
             </b-tab>
-            <b-tab
-              title="Keyframes"
-              v-if="features.processedFrames"
-              data-simplebar
-              class="scrollable"
-            >
+            <b-tab title="Keyframes" v-if="features.processedFrames" data-simplebar class="scrollable">
               <video-feature-container :features="features" />
             </b-tab>
           </b-tabs>
@@ -65,8 +54,6 @@ import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as url from 'url';
 
-const { app, ipcRenderer } = window.require('electron');
-
 export default {
   components: {
     VideoContainer,
@@ -87,11 +74,6 @@ export default {
       features: {},
     };
   },
-  mounted() {
-    ipcRenderer.on('open-video-file', () => {
-      this.$refs.videoInput.click();
-    });
-  },
   methods: {
     async updateData(video) {
       console.log(video);
@@ -109,7 +91,7 @@ export default {
       this.features = {
         keyframes: extractedKeyframes,
         processedFrames: processedFrames,
-        clusteredImages: clusteredImages
+        clusteredImages: clusteredImages,
       };
     },
     onFrameClicked(frame) {
@@ -130,7 +112,7 @@ export default {
 }
 
 .scrollable {
-  max-height: 575px;
+  max-height: 900px;
   overflow-x: auto;
 }
 </style>

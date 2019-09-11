@@ -10,8 +10,8 @@ import Editor from './views/Editor.vue';
 export default {
   name: 'app',
   components: {
-    Editor
-  }
+    Editor,
+  },
 };
 </script>
 
@@ -27,9 +27,5 @@ export default {
 * {
   margin: 0;
   padding: 0;
-}
-
-html, body {
-  min-height: 100%;
 }
 </style>

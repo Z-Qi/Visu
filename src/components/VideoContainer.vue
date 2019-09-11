@@ -1,70 +1,56 @@
 <template>
   <b-container fluid>
     <b-row>
-      <b-col cols="3">
-        <b-row>
-          <b-col>
-            <video
-              ref="videoPlayer"
-              class="video-js"
-              @loadedmetadata="updateMetadata"
-              @play="playing = true"
-              @pause="playing = false"
-            ></video>
-          </b-col>
-        </b-row>
-        <b-row class="my-1">
-          <b-col>
-            <vue-slider
-              ref="slider"
-              v-model="values"
-              v-bind="sliderOptions"
-              @drag-start="dragging = true"
-              @drag-end="dragging = false"
-            />
-          </b-col>
-        </b-row>
-        <b-row align-h="center" class="mb-1" no-gutters>
-          <b-col>
-            <b-button
-              class="mx-1"
-              :disabled="!video.framerate"
-              @click="skipFrames(-video.framerate)"
-              variant="dark"
-              v-text="'<<'"
-            />
-            <b-button
-              class="mx-1"
-              :disabled="!video.framerate"
-              @click="skipFrames(-1)"
-              variant="dark"
-              v-text="'<'"
-            />
-            <b-button
-              class="mx-1 flex-grow-1"
-              :disabled="!video.framerate"
-              @click="togglePlaying"
-              variant="dark"
-              v-text="playing ? 'Pause' : 'Play'"
-            />
-            <b-button
-              class="mx-1"
-              :disabled="!video.framerate"
-              @click="skipFrames(1)"
-              variant="dark"
-              v-text="'>'"
-            />
-            <b-button
-              class="mx-1"
-              :disabled="!video.framerate"
-              @click="skipFrames(video.framerate)"
-              variant="dark"
-              v-text="'>>'"
-            />
-          </b-col>
-        </b-row>
+      <b-col>
+        <video
+          ref="videoPlayer"
+          class="video-js"
+          @loadedmetadata="updateMetadata"
+          @play="playing = true"
+          @pause="playing = false"
+        ></video>
       </b-col>
-      <b-col data-simplebar class="scrollable" cols="4">
+    </b-row>
+    <b-row class="my-1">
+      <b-col>
+        <vue-slider
+          ref="slider"
+          v-model="values"
+          v-bind="sliderOptions"
+          @drag-start="dragging = true"
+          @drag-end="dragging = false"
+        />
+      </b-col>
+    </b-row>
+    <b-row align-h="center" class="mb-1" no-gutters>
+      <b-col>
+        <b-button
+          class="mx-1"
+          :disabled="!video.framerate"
+          @click="skipFrames(-video.framerate)"
+          variant="dark"
+          v-text="'<<'"
+        />
+        <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(-1)" variant="dark" v-text="'<'" />
+        <b-button
+          class="mx-1 flex-grow-1"
+          :disabled="!video.framerate"
+          @click="togglePlaying"
+          variant="dark"
+          v-text="playing ? 'Pause' : 'Play'"
+        />
+        <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(1)" variant="dark" v-text="'>'" />
+        <b-button
+          class="mx-1"
+          :disabled="!video.framerate"
+          @click="skipFrames(video.framerate)"
+          variant="dark"
+          v-text="'>>'"
+        />
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col data-simplebar class="scrollable">
         <draggable :list="snippets" draggable=".item">
           <b-row
             class="list-item item"
@@ -111,18 +97,10 @@
           </b-row>
         </draggable>
       </b-col>
-      <b-col cols="4">
-        <div class="w-50 mx-auto">
-          <label id="video-btn" for="videoFile">Open Video</label>
-          <input
-            id="videoFile"
-            type="file"
-            ref="videoInput"
-            accept="video/*"
-            @change="loadVideo"
-            style="display: none"
-          />
-        </div>
+    </b-row>
+    <b-row>
+      <b-col>
+        <input id="videoFile" type="file" ref="videoInput" accept="video/*" @change="loadVideo" style="display: none" />
       </b-col>
     </b-row>
   </b-container>
@@ -146,7 +124,8 @@ import * as path from 'path';
 
 import Video from '../util/video';
 import { generateSummary } from '../util/generate_summary';
-const { dialog, app } = require('electron').remote;
+const { app, dialog } = require('electron').remote;
+const { ipcRenderer } = window.require('electron');
 
 export default {
   name: 'VideoContainer',
@@ -190,6 +169,9 @@ export default {
   },
   mounted() {
     this.player = videojs(this.$refs.videoPlayer, this.options);
+    ipcRenderer.on('open-video-file', () => {
+      this.$refs.videoInput.click();
+    });
   },
   beforeDestroy() {
     if (this.player) {
@@ -346,7 +328,7 @@ export default {
 }
 
 .scrollable {
-  max-height: 375px;
+  max-height: 650px;
 }
 
 .header {
