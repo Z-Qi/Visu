@@ -296,11 +296,14 @@ export default {
     },
     addFilter(filter) {
       // todo: check for duplicate filters (order doesn't matter)
-      this.filterRows.push({
-        filter: filter,
-        images: this.images.filter(img => filter.every(val => img.objects.includes(val))),
-        background: this.colors[this.filterRows.length],
-      });
+      const filteredImages = this.images.filter(img => filter.every(val => img.objects.includes(val)));
+      if (filteredImages.length > 0) {
+        this.filterRows.push({
+          filter: filter,
+          images: filteredImages,
+          background: this.colors[this.filterRows.length],
+        });
+      }
       this.filter = [];
     },
     addNewFilter() {
