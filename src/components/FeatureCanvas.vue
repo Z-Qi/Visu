@@ -77,6 +77,10 @@ export default {
       type: Object,
       required: true,
     },
+    snippets: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     return {
@@ -100,8 +104,11 @@ export default {
     },
   },
   watch: {
-    images(newImages, oldImages) {
-      this.updateImages();
+    async images(newImages, oldImages) {
+      await this.updateImages();
+    },
+    async snippets(newSnippets, oldSnippets) {
+      await this.drawImages();
     },
   },
   mounted() {
@@ -202,7 +209,6 @@ export default {
             shadowOffset: { x: 0, y: 13 },
             shadowOpacity: 0.4,
           });
-
           konvaImage.on('mouseenter', () => {
             this.overlayLayer.removeChildren();
             const mousePos = this.stage.getPointerPosition();
@@ -262,6 +268,7 @@ export default {
         this.imageLayer.add(rowBackground);
         rowBackground.moveToBottom();
       }
+      this.highlightImages();
       this.imageLayer.draw();
       this.linkImages();
     },
@@ -320,6 +327,20 @@ export default {
     async removeFilter(index) {
       this.filterRows.splice(index, 1);
       await this.drawImages();
+    },
+    highlightImages() {
+      for (const row of this.filterRows) {
+        for (const i in row.images) {
+          if (this.snippets.some(s => s.start <= row.images[i].frameNumber && s.end >= row.images[i].frameNumber)) {
+            row.canvasImages[i].cache();
+            row.canvasImages[i].filters([Konva.Filters.RGBA]);
+            row.canvasImages[i].red(135);
+            row.canvasImages[i].green(181);
+            row.canvasImages[i].blue(255);
+            row.canvasImages[i].alpha(0.5);
+          }
+        }
+      }
     },
   },
 };

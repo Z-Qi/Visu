@@ -17,9 +17,11 @@ export async function extractKeyframes(video, step) {
   const keyframePaths = util.readDirectory(util.FRAME_DIR);
 
   return keyframePaths.map(path => {
+    const frameNumber = parseInt(path.match(/\d+/)[0]);
     return new Frame(
       `${url.pathToFileURL(path)}?time=${Date.now()}`,
-      parseInt(path.match(/\d+/)[0]) / video.framerate
+      frameNumber / video.framerate,
+      frameNumber,
     );
   });
 }

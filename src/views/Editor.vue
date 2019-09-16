@@ -3,7 +3,7 @@
     <b-container fluid>
       <b-row class="my-4" no-gutters>
         <b-col cols="3">
-          <video-container ref="videoContainer" @metadata-loaded="updateData"></video-container>
+          <video-container ref="videoContainer" @metadata-loaded="updateData" @snippets-changed="onSnippetsChanged"></video-container>
         </b-col>
         <b-col cols="9">
           <b-tabs pills card>
@@ -13,6 +13,7 @@
                 v-if="features.processedFrames"
                 :images="features.processedFrames"
                 :resolution="video.resolution"
+                :snippets="snippets"
                 @frame-clicked="onFrameClicked"
               ></feature-canvas>
             </b-tab>
@@ -22,6 +23,7 @@
                 v-if="features.clusteredImages"
                 :images="features.clusteredImages"
                 :resolution="video.resolution"
+                :snippets="snippets"
                 @frame-clicked="onFrameClicked"
               ></cluster-canvas>
             </b-tab>
@@ -71,6 +73,7 @@ export default {
   data() {
     return {
       video: null,
+      snippets: [],
       features: {},
     };
   },
@@ -93,6 +96,9 @@ export default {
         processedFrames: processedFrames,
         clusteredImages: clusteredImages,
       };
+    },
+    onSnippetsChanged(snippets) {
+      this.snippets = snippets;
     },
     onFrameClicked(frame) {
       this.$refs.videoContainer.seek(frame.timestamp);

@@ -31,7 +31,13 @@
           variant="dark"
           v-text="'<<'"
         />
-        <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(-1)" variant="dark" v-text="'<'" />
+        <b-button
+          class="mx-1"
+          :disabled="!video.framerate"
+          @click="skipFrames(-1)"
+          variant="dark"
+          v-text="'<'"
+        />
         <b-button
           class="mx-1 flex-grow-1"
           :disabled="!video.framerate"
@@ -39,7 +45,13 @@
           variant="dark"
           v-text="playing ? 'Pause' : 'Play'"
         />
-        <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(1)" variant="dark" v-text="'>'" />
+        <b-button
+          class="mx-1"
+          :disabled="!video.framerate"
+          @click="skipFrames(1)"
+          variant="dark"
+          v-text="'>'"
+        />
         <b-button
           class="mx-1"
           :disabled="!video.framerate"
@@ -100,7 +112,14 @@
     </b-row>
     <b-row>
       <b-col>
-        <input id="videoFile" type="file" ref="videoInput" accept="video/*" @change="loadVideo" style="display: none" />
+        <input
+          id="videoFile"
+          type="file"
+          ref="videoInput"
+          accept="video/*"
+          @change="loadVideo"
+          style="display: none"
+        />
       </b-col>
     </b-row>
   </b-container>
@@ -299,6 +318,7 @@ export default {
         start: this.values[0],
         end: this.values[1],
       });
+      this.$emit('snippets-changed', this.snippets);
     },
     generateSummaryDialog() {
       dialog.showSaveDialog(null, { defaultPath: app.getPath('documents') }, summaryPath => {

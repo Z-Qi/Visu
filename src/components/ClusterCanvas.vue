@@ -42,6 +42,10 @@ export default {
       type: Object,
       required: true,
     },
+    snippets: {
+      type: Array,
+      required: true,
+    },
   },
 
   data() {
@@ -51,13 +55,17 @@ export default {
       overlayLayer: null,
       filter: null,
       options: [],
+      konvaImages: [],
     };
   },
   watch: {
-    images(newImages, oldImages) {
-      this.updateImages();
+    async images(newImages, oldImages) {
+      await this.updateImages();
     },
     async filter() {
+      await this.drawImages();
+    },
+    async snippets() {
       await this.drawImages();
     },
   },
@@ -128,6 +136,7 @@ export default {
     },
     async drawImages() {
       this.imageLayer.removeChildren();
+      this.konvaImages = [];
       const width = 250;
       const height = (width * this.resolution.height) / this.resolution.width;
       const y = height;
@@ -156,13 +165,14 @@ export default {
           shadowOffset: { x: 0, y: 13 },
           shadowOpacity: 0.4,
         });
+        this.konvaImages.push(konvaImage);
         this.imageLayer.add(konvaImage);
 
         if (this.filter && !this.images[i].objects.includes(this.filter)) {
           konvaImage.opacity(0.2);
           konvaImage.shadowOpacity(0);
           konvaImage.moveToBottom();
-          konvaImage.scale({x: 0.5, y: 0.5});
+          konvaImage.scale({ x: 0.5, y: 0.5 });
         } else {
           konvaImage.on('mouseenter', () => {
             this.overlayLayer.removeChildren();
@@ -206,6 +216,7 @@ export default {
           });
         }
       }
+      this.highlightImages();
       this.imageLayer.draw();
     },
     loadImage(src) {
@@ -216,6 +227,18 @@ export default {
           resolve(image);
         };
       });
+    },
+    highlightImages() {
+      for (const i in this.images) {
+        if (this.snippets.some(s => s.start <= this.images[i].frameNumber && s.end >= this.images[i].frameNumber)) {
+          this.konvaImages[i].cache();
+          this.konvaImages[i].filters([Konva.Filters.RGBA]);
+          this.konvaImages[i].red(135);
+          this.konvaImages[i].green(181);
+          this.konvaImages[i].blue(255);
+          this.konvaImages[i].alpha(0.5);
+        }
+      }
     },
   },
 };
