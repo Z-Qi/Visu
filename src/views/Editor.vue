@@ -1,34 +1,47 @@
 <template>
   <div>
-    <b-container fluid>
-      <b-row class="my-4" no-gutters>
+    <b-container 
+      fluid 
+      class="overflow-auto">
+      <b-row 
+        no-gutters 
+        class="my-4">
         <b-col cols="3">
-          <video-container ref="videoContainer" @metadata-loaded="updateData" @snippets-changed="onSnippetsChanged"></video-container>
+          <video-container
+            ref="videoContainer"
+            @metadata-loaded="updateData"
+            @snippets-changed="onSnippetsChanged"
+          />
         </b-col>
         <b-col cols="9">
-          <b-tabs pills card>
-            <b-tab title="Visualisation" active>
-              <b-spinner v-if="video && !features.processedFrames" variant="primary"></b-spinner>
+          <b-tabs 
+            pills 
+            card>
+            <b-tab 
+              title="Visualisation" 
+              active>
+              <b-spinner 
+                v-if="video && !features.processedFrames" 
+                variant="primary"/>
               <feature-canvas
                 v-if="features.processedFrames"
                 :images="features.processedFrames"
                 :resolution="video.resolution"
                 :snippets="snippets"
                 @frame-clicked="onFrameClicked"
-              ></feature-canvas>
+              />
             </b-tab>
             <b-tab title="Clustering">
-              <b-spinner v-if="video && !features.clusteredImages" variant="primary"></b-spinner>
+              <b-spinner 
+                v-if="video && !features.clusteredImages" 
+                variant="primary"/>
               <cluster-canvas
                 v-if="features.clusteredImages"
                 :images="features.clusteredImages"
                 :resolution="video.resolution"
                 :snippets="snippets"
                 @frame-clicked="onFrameClicked"
-              ></cluster-canvas>
-            </b-tab>
-            <b-tab title="Keyframes" v-if="features.processedFrames" data-simplebar class="scrollable">
-              <video-feature-container :features="features" />
+              />
             </b-tab>
           </b-tabs>
         </b-col>
@@ -39,8 +52,6 @@
 
 <script>
 import VideoContainer from '../components/VideoContainer';
-import VideoFeatureContainer from '../components/VideoFeatureContainer';
-import DetectedObjectsContainer from '../components/DetectedObjectsContainer';
 import FeatureCanvas from '../components/FeatureCanvas';
 import ClusterCanvas from '../components/ClusterCanvas';
 import { BContainer, BRow, BCol, BTabs, BTab, BButton, BFormFile, BSpinner } from 'bootstrap-vue';
@@ -59,8 +70,6 @@ import * as url from 'url';
 export default {
   components: {
     VideoContainer,
-    VideoFeatureContainer,
-    DetectedObjectsContainer,
     ClusterCanvas,
     FeatureCanvas,
     BContainer,
@@ -85,9 +94,7 @@ export default {
       await this.processVideo();
     },
     async processVideo() {
-      const extractedKeyframes = await extractKeyframes(this.video, 5);
-      // todo: add option to use other other frames
-      // todo: figure out what to do with sbd info
+      const extractedKeyframes = await extractKeyframes(this.video, 10);
       const processedFrames = await detectObjectsInFrames(extractedKeyframes);
       const clusteredImages = await getClusteredImages(processedFrames);
       // const processedFrames = extractedKeyframes;
@@ -106,19 +113,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.main-content {
-  height: 80%;
-  padding-top: 15px;
-}
-
-.footer {
-  max-height: 20%;
-}
-
-.scrollable {
-  max-height: 900px;
-  overflow-x: auto;
-}
-</style>

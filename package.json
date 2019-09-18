@@ -19,6 +19,7 @@
     "bootstrap-vue": "^2.0.0-rc.26",
     "core-js": "^2.6.5",
     "electron": "^5.0.6",
+    "electron-progressbar": "^1.2.0",
     "konva": "^4.0.5",
     "rimraf": "^2.6.3",
     "simplebar": "^4.1.0",

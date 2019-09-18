@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 
-export async function generateSummary(snippets, inputVideo, outputVideo) {
+export function generateSummary(snippets, inputVideo, outputVideo) {
   let trims = '';
   let concat = '';
 
@@ -15,12 +15,13 @@ export async function generateSummary(snippets, inputVideo, outputVideo) {
   concat += `concat=n=${snippets.length}:v=1:a=1[v][a]`;
 
   let filter = `"${trims}${concat}"`;
-
-  exec(`ffmpeg -i ${inputVideo} -filter_complex ${filter} -map "[v]" -map "[a]" ${outputVideo} -y`, (err, out) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(out);
-    }
+  return new Promise((resolve, reject) => {
+    exec(`ffmpeg -i ${inputVideo} -filter_complex ${filter} -map "[v]" -map "[a]" ${outputVideo} -y`, (err, out) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(out);
+      }
+    });
   });
 }

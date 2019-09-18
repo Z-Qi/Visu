@@ -2,7 +2,7 @@
 
 import { app, globalShortcut, ipcMain, protocol, BrowserWindow, Menu } from 'electron';
 import { createProtocol, installVueDevtools } from 'vue-cli-plugin-electron-builder/lib';
-import { spawn } from 'child_process';
+import * as ProgressBar from 'electron-progressbar';
 const isDev = process.env.NODE_ENV !== 'production';
 
 // Global reference so object is not garbage collected.
@@ -18,8 +18,8 @@ function createWindow() {
     height: 800,
     webPreferences: {
       nodeIntegration: true,
-      webSecurity: false
-    }
+      webSecurity: false,
+    },
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -46,21 +46,43 @@ function createWindow() {
           label: 'Open Video',
           click: () => {
             openVideo();
-          }
+          },
         },
         { type: 'separator' },
-        { role: 'quit' }
-      ]
+        { role: 'quit' },
+      ],
     },
     { role: 'editMenu' },
-    { role: 'viewMenu' }
+    { role: 'viewMenu' },
   ];
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
-  ipcMain.on('loaded', () => {
-    window.reload();
-    console.log('xd');
+  let progressBar;
+
+  ipcMain.on('start-progress', (event, info) => {
+    progressBar = new ProgressBar({
+      title: info.title,
+      text: info.text,
+      detail: info.detail,
+      browserWindow: {
+        frame: false,
+        closeable: false,
+        parent: window,
+        webPreferences: {
+          nodeIntegration: true,
+        },
+      },
+    });
+    progressBar.on('completed', () => {
+      progressBar.detail = info.completedDetail;
+    });
+  });
+
+  ipcMain.on('stop-progress', () => {
+    if (progressBar) {
+      progressBar.setCompleted();
+    }
   });
 
   window.on('closed', () => {

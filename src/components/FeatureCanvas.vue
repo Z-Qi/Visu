@@ -11,38 +11,35 @@
           :show-labels="false"
           :placeholder="filterRows.length < colors.length ? 'Select filters' : 'Can\'t add more filters'"
           :disabled="filterRows.length == colors.length"
-        ></multiselect>
+        />
       </b-col>
       <b-button
+        :disabled="filter.length === 0"
         class="flex-grow-1"
         variant="primary"
         @click="addNewFilter()"
-        :disabled="filter.length === 0"
       >Add Filters</b-button>
     </b-row>
     <b-container fluid>
-      <b-row class="mt-2" v-for="(f, i) in shownFilters" :key="f.filters">
+      <b-row class="mt-2">
         <b-col
-          class="py-1 text-black rounded border-bottom"
-          cols="auto"
+          v-for="(f, i) in shownFilters"
+          :key="f.filters"
           :style="`background: ${f.background}`"
+          class="py-1 mr-2 text-black rounded border-bottom"
+          cols="auto"
         >
           <span class="filter-badge" @click="() => navigateToRow(f)">
             Contains a
             <span v-for="(val, j) in f.filter" :key="val">
               <span>
-                <b>{{val}}</b>
+                <b>{{ val }}</b>
               </span>
               <span v-if="j < f.filter.length - 1">,&nbsp;</span>
               <span v-if="j == f.filter.length - 2">and&nbsp;</span>
             </span>
           </span>
-          <button
-            type="button"
-            class="ml-2 close"
-            aria-label="Close"
-            @click="removeFilter(shownFilters.length - i)"
-          >
+          <button type="button" class="ml-2 close" aria-label="Close" @click="removeFilter(i + 1)">
             <span aria-hidden="true">&times;</span>
           </button>
         </b-col>
@@ -53,6 +50,22 @@
         <div id="stage" ref="stage" class="rounded border" />
       </b-col>
     </b-row>
+    <b-row>
+      <b-col>
+        <div id="overview" ref="overview" class="my-2 border" />
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <vue-slider
+          v-model="sliderPosition"
+          :tooltip="'none'"
+          :min="sliderValues.min"
+          :max="sliderValues.max"
+          :interval="1"
+        />
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
@@ -61,12 +74,16 @@ import Konva from 'konva';
 import { BButton, BContainer, BRow } from 'bootstrap-vue';
 import Multiselect from 'vue-multiselect';
 
+import VueSlider from 'vue-slider-component';
+import 'vue-slider-component/theme/default.css';
+
 export default {
   components: {
     BButton,
     BContainer,
     BRow,
     Multiselect,
+    VueSlider,
   },
   props: {
     images: {
@@ -85,6 +102,8 @@ export default {
   data() {
     return {
       stage: null,
+      overviewStage: null,
+      overviewLayer: null,
       imageLayer: null,
       linkLayer: null,
       overlayLayer: null,
@@ -93,14 +112,16 @@ export default {
       options: [],
       colors: [],
       indexMap: new Map(),
+      sliderPosition: 0,
+      sliderValues: {
+        min: -50,
+        max: 0,
+      },
     };
   },
   computed: {
     shownFilters: function() {
-      return this.filterRows
-        .filter(r => r.filter.length > 0)
-        .slice()
-        .reverse();
+      return this.filterRows.filter(r => r.filter.length > 0);
     },
   },
   watch: {
@@ -110,24 +131,21 @@ export default {
     async snippets(newSnippets, oldSnippets) {
       await this.drawImages();
     },
+    sliderPosition() {
+      this.stage.position({ x: -this.sliderPosition, y: this.stage.position().y });
+      this.stage.batchDraw();
+    },
   },
   mounted() {
     const stageStyle = window.getComputedStyle(this.$refs.stage);
     const stageWidth = this.$refs.stage.clientWidth;
-    const stageHeight = window.innerHeight / 2;
+    const stageHeight = window.innerHeight / 1.6;
     this.stage = new Konva.Stage({
       container: 'stage',
       width: stageWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
       height: stageHeight,
       draggable: true,
     });
-
-    this.imageLayer = new Konva.Layer();
-    this.linkLayer = new Konva.Layer();
-    this.overlayLayer = new Konva.Layer();
-    this.stage.add(this.imageLayer);
-    this.stage.add(this.linkLayer);
-    this.stage.add(this.overlayLayer);
 
     this.stage.on('wheel', e => {
       e.evt.preventDefault();
@@ -141,22 +159,54 @@ export default {
 
       const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
       this.stage.scale({ x: newScale, y: newScale });
+      this.sliderValues.max = Math.floor((this.sliderValues.max / oldScale) * newScale);
 
       const newPos = {
         x: -(mousePointTo.x - mousePos.x / newScale) * newScale,
         y: -(mousePointTo.y - mousePos.y / newScale) * newScale,
       };
       this.stage.position(newPos);
-
       this.stage.batchDraw();
     });
+
+    this.stage.on('xChange', e => {
+      let position = -Math.floor(e.newVal);
+      if (position < this.sliderValues.min) {
+        position = this.sliderValues.min;
+      } else if (position > this.sliderValues.max) {
+        position = this.sliderValues.max;
+      }
+      this.sliderPosition = position;
+    });
+
+    this.imageLayer = new Konva.Layer();
+    this.linkLayer = new Konva.Layer();
+    this.overlayLayer = new Konva.Layer();
+    this.stage.add(this.imageLayer);
+    this.stage.add(this.linkLayer);
+    this.stage.add(this.overlayLayer);
+
+    const overviewStageHeight = 60;
+    this.overviewStage = new Konva.Stage({
+      container: 'overview',
+      width: this.$refs.overview.clientWidth,
+      height: overviewStageHeight,
+    });
+
+    this.overviewLayer = new Konva.Layer();
+    this.overviewStage.add(this.overviewLayer);
 
     new ResizeObserver(() => {
       this.stage.size({
         width: this.$refs.stage.clientWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
         height: stageHeight,
       });
+      this.overviewStage.size({
+        width: this.$refs.overview.clientWidth,
+        height: overviewStageHeight,
+      });
       this.stage.batchDraw();
+      this.drawOverview();
     }).observe(this.$refs.stage);
 
     this.updateImages();
@@ -166,7 +216,7 @@ export default {
       this.options = [];
       this.indexMap = new Map();
 
-      for (const i in this.images) {
+      for (let i = 0; i < this.images.length; ++i) {
         this.indexMap.set(this.images[i].src, i);
 
         if (this.images[i].objects) {
@@ -185,6 +235,8 @@ export default {
       this.addFilter([]);
 
       await this.drawImages();
+      this.linkImages();
+      this.drawOverview();
     },
     async drawImages() {
       this.imageLayer.removeChildren();
@@ -192,12 +244,30 @@ export default {
       const height = (width * this.resolution.height) / this.resolution.width;
       const y = height;
 
-      for (const i in this.filterRows) {
+      // todo: clean up these magic numbers
+      this.sliderValues.max = Math.floor(
+        ((width + 75) * this.images.length - this.stage.width()) * this.stage.scaleX()
+      );
+
+      this.stage.dragBoundFunc(pos => {
+        let newX = -Math.floor(pos.x);
+        if (newX < this.sliderValues.min) {
+          newX = this.sliderValues.min;
+        } else if (newX > this.sliderValues.max) {
+          newX = this.sliderValues.max;
+        }
+        return {
+          x: -newX,
+          y: pos.y,
+        };
+      });
+
+      for (let i = 0; i < this.filterRows.length; ++i) {
         const row = this.filterRows[i];
         const images = row.images;
         row.canvasImages = [];
 
-        for (const j in images) {
+        for (let j = 0; j < images.length; ++j) {
           const konvaImage = new Konva.Image({
             x: (75 + width) * this.indexMap.get(images[j].src),
             y: y - i * 300,
@@ -264,13 +334,33 @@ export default {
           fill: row.background,
           cornerRadius: 15,
         });
-
         this.imageLayer.add(rowBackground);
         rowBackground.moveToBottom();
       }
       this.highlightImages();
       this.imageLayer.draw();
-      this.linkImages();
+    },
+    drawOverview() {
+      this.overviewLayer.removeChildren();
+      for (let i = 1; i < this.filterRows.length; ++i) {
+        const images = this.filterRows[i].images;
+        for (let j = 0; j < images.length; ++j) {
+          const images = this.filterRows[i].images;
+          const rectX = this.overviewStage.width() * (this.indexMap.get(images[j].src) / this.images.length);
+          const rectY = (this.colors.length - i - 1) * (this.overviewStage.height() / this.colors.length);
+          const rectWidth = this.overviewStage.width() / this.images.length;
+          const rectHeight = this.overviewStage.height() / this.colors.length;
+          const rect = new Konva.Rect({
+            x: rectX,
+            y: rectY,
+            width: rectWidth,
+            height: rectHeight,
+            fill: this.colors[i],
+          });
+          this.overviewLayer.add(rect);
+        }
+      }
+      this.overviewLayer.draw();
     },
     linkImages() {
       this.linkLayer.removeChildren();
@@ -316,6 +406,7 @@ export default {
     addNewFilter() {
       this.addFilter(this.filter);
       this.drawImages();
+      this.drawOverview();
     },
     navigateToRow(row) {
       this.stage.position({
@@ -326,12 +417,17 @@ export default {
     },
     async removeFilter(index) {
       this.filterRows.splice(index, 1);
+      for (let i = 0; i < this.filterRows.length; ++i) {
+        this.filterRows[i].background = this.colors[i];
+      }
       await this.drawImages();
+      this.drawOverview();
     },
     highlightImages() {
       for (const row of this.filterRows) {
         for (const i in row.images) {
           if (this.snippets.some(s => s.start <= row.images[i].frameNumber && s.end >= row.images[i].frameNumber)) {
+            row.canvasImages[i].shadowOpacity(0.0);
             row.canvasImages[i].cache();
             row.canvasImages[i].filters([Konva.Filters.RGBA]);
             row.canvasImages[i].red(135);

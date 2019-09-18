@@ -10,7 +10,7 @@
           :searchable="false"
           :show-labels="false"
           :placeholder="'Select a filter'"
-        ></multiselect>
+        />
       </b-col>
     </b-row>
     <b-row>
@@ -72,7 +72,7 @@ export default {
   mounted() {
     const stageStyle = window.getComputedStyle(this.$refs.clusterStage);
     const stageWidth = this.$refs.clusterStage.clientWidth;
-    const stageHeight = window.innerHeight / 2;
+    const stageHeight = window.innerHeight / 1.5;
     this.stage = new Konva.Stage({
       container: 'cluster-stage',
       width: stageWidth - parseFloat(stageStyle.paddingLeft) - parseFloat(stageStyle.paddingRight),
@@ -231,6 +231,7 @@ export default {
     highlightImages() {
       for (const i in this.images) {
         if (this.snippets.some(s => s.start <= this.images[i].frameNumber && s.end >= this.images[i].frameNumber)) {
+          this.konvaImages[i].shadowOpacity(0.0);
           this.konvaImages[i].cache();
           this.konvaImages[i].filters([Konva.Filters.RGBA]);
           this.konvaImages[i].red(135);

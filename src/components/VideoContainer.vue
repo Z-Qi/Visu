@@ -8,7 +8,7 @@
           @loadedmetadata="updateMetadata"
           @play="playing = true"
           @pause="playing = false"
-        ></video>
+        />
       </b-col>
     </b-row>
     <b-row class="my-1">
@@ -22,94 +22,135 @@
         />
       </b-col>
     </b-row>
-    <b-row align-h="center" class="mb-1" no-gutters>
+    <b-row 
+      align-h="center" 
+      class="mb-1" 
+      no-gutters>
       <b-col>
         <b-button
-          class="mx-1"
           :disabled="!video.framerate"
+          class="mx-1"
+          variant="dark"
           @click="skipFrames(-video.framerate)"
-          variant="dark"
-          v-text="'<<'"
-        />
-        <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(-1)" variant="dark" v-text="'<'" />
+        >
+          <font-awesome-icon icon="fast-backward" />
+        </b-button>
+        <b-button 
+          :disabled="!video.framerate" 
+          class="mx-1" 
+          variant="dark" 
+          @click="skipFrames(-1)">
+          <font-awesome-icon 
+            icon="caret-left" 
+            size="lg" />
+        </b-button>
         <b-button
+          :disabled="!video.framerate"
           class="mx-1 flex-grow-1"
-          :disabled="!video.framerate"
+          variant="dark"
           @click="togglePlaying"
-          variant="dark"
-          v-text="playing ? 'Pause' : 'Play'"
-        />
-        <b-button class="mx-1" :disabled="!video.framerate" @click="skipFrames(1)" variant="dark" v-text="'>'" />
+        >
+          <font-awesome-icon :icon="playing ? 'pause' : 'play'" />
+        </b-button>
+        <b-button 
+          :disabled="!video.framerate" 
+          class="mx-1" 
+          variant="dark" 
+          @click="skipFrames(1)">
+          <font-awesome-icon 
+            icon="caret-right" 
+            size="lg" />
+        </b-button>
         <b-button
-          class="mx-1"
           :disabled="!video.framerate"
-          @click="skipFrames(video.framerate)"
+          class="mx-1"
           variant="dark"
-          v-text="'>>'"
-        />
+          @click="skipFrames(video.framerate)"
+        >
+          <font-awesome-icon icon="fast-forward" />
+        </b-button>
       </b-col>
     </b-row>
-    <b-row>
-      <b-col data-simplebar class="scrollable">
-        <draggable :list="snippets" draggable=".item">
+    <b-row class="mt-3">
+      <b-col 
+        data-simplebar 
+        class="scrollable">
+        <draggable 
+          :list="snippets" 
+          draggable=".item">
           <b-row
-            no-gutters
-            class="list-item item"
             v-for="(snippet, index) in snippets"
             :key="snippet.start + snippet.end"
+            no-gutters
+            class="list-item item"
             style="text-align: start;"
           >
             <b-col cols="6">
               <b-row no-gutters>
                 <b-col cols="7">
                   First Frame:
-                  <br />Final Frame:
+                  <br >Final Frame:
                 </b-col>
                 <b-col cols="5">
                   {{ snippet.start }}
-                  <br />
+                  <br >
                   {{ snippet.end }}
                 </b-col>
               </b-row>
             </b-col>
             <b-col cols="5">
               Time:&emsp;{{ (snippet.start / video.framerate).toFixed(2) }} s
-              <br />
+              <br >
               Time:&emsp;{{ (snippet.end / video.framerate).toFixed(2) }} s
             </b-col>
             <b-col cols="1">
-              <font-awesome-icon icon="times" @click="removeSnippet(index)" />
+              <font-awesome-icon 
+                icon="times" 
+                @click="removeSnippet(index)" />
             </b-col>
           </b-row>
-          <b-row no-gutters slot="header" class="list-item header">
-            <b-col class="btn-group">
-              <b-button
-                class="mx-auto"
-                :disabled="
-                  snippets.some(c => c.start == values[0] && c.end == values[1]) || dragging || values[0] == values[1]
-                "
-                @click="addSnippet"
-                variant="dark"
-                v-text="'Add Snippet'"
-              />
-              <b-button
-                class="mx-auto"
-                :disabled="snippets.length < 1"
-                @click="generateSummaryDialog"
-                variant="dark"
-                v-text="'Generate Summary'"
-              />
-              <b-button class="mx-auto" :disabled="snippets.length < 2" @click="sortSnippets" variant="dark">
-                <font-awesome-icon icon="sync-alt" />
-              </b-button>
-            </b-col>
+          <b-row 
+            slot="header" 
+            no-gutters 
+            class="list-item header">
+            <b-button
+              :disabled="
+                snippets.some(c => c.start == values[0] && c.end == values[1]) || dragging || values[0] == values[1]
+              "
+              class="mr-1 flex-grow-1"
+              variant="dark"
+              @click="addSnippet"
+              v-text="'Add Snippet'"
+            />
+            <b-button
+              :disabled="snippets.length < 1"
+              class="mr-1 flex-grow-1"
+              variant="dark"
+              @click="generateSummaryDialog"
+              v-text="'Generate Summary'"
+            />
+            <b-button 
+              :disabled="snippets.length < 2" 
+              variant="dark" 
+              @click="sortSnippets">
+              <font-awesome-icon 
+                icon="sort" 
+                size="lg" />
+            </b-button>
           </b-row>
         </draggable>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
-        <input id="videoFile" type="file" ref="videoInput" accept="video/*" @change="loadVideo" style="display: none" />
+        <input
+          id="videoFile"
+          ref="videoInput"
+          type="file"
+          accept="video/*"
+          style="display: none"
+          @change="loadVideo"
+        >
       </b-col>
     </b-row>
   </b-container>
@@ -136,9 +177,20 @@ import { generateSummary } from '../util/generate_summary';
 const { app, dialog } = require('electron').remote;
 const { ipcRenderer } = window.require('electron');
 
+import ProgressBar from 'electron-progressbar';
+
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faTimes, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
-library.add(faTimes, faSyncAlt);
+import {
+  faTimes,
+  faSort,
+  faFastForward,
+  faFastBackward,
+  faCaretLeft,
+  faCaretRight,
+  faPlay,
+  faPause,
+} from '@fortawesome/free-solid-svg-icons';
+library.add(faTimes, faSort, faFastForward, faFastBackward, faCaretLeft, faCaretRight, faPlay, faPause);
 
 export default {
   name: 'VideoContainer',
@@ -180,17 +232,6 @@ export default {
       snippets: [],
     };
   },
-  mounted() {
-    this.player = videojs(this.$refs.videoPlayer, this.options);
-    ipcRenderer.on('open-video-file', () => {
-      this.$refs.videoInput.click();
-    });
-  },
-  beforeDestroy() {
-    if (this.player) {
-      this.player.dispose();
-    }
-  },
   watch: {
     playing(newValue, oldValues) {
       if (newValue) {
@@ -226,6 +267,17 @@ export default {
         this.player.currentTime(currentFrame / this.video.framerate);
       }
     },
+  },
+  mounted() {
+    this.player = videojs(this.$refs.videoPlayer, this.options);
+    ipcRenderer.on('open-video-file', () => {
+      this.$refs.videoInput.click();
+    });
+  },
+  beforeDestroy() {
+    if (this.player) {
+      this.player.dispose();
+    }
   },
   methods: {
     async loadVideo() {
@@ -321,7 +373,7 @@ export default {
       this.snippets = sorted;
     },
     generateSummaryDialog() {
-      dialog.showSaveDialog(null, { defaultPath: app.getPath('documents') }, summaryPath => {
+      dialog.showSaveDialog(null, { defaultPath: app.getPath('documents') }, async summaryPath => {
         const snippetTimes = this.snippets.map(snippet => {
           return {
             start: snippet.start / this.video.framerate,
@@ -330,7 +382,14 @@ export default {
         });
 
         if (summaryPath) {
-          generateSummary(snippetTimes, this.video.path, summaryPath);
+          ipcRenderer.send('start-progress', {
+            title: 'Generate Summary',
+            text: 'Generating summary...',
+            detail: `Saving to ${summaryPath}`,
+            completedDetail: 'Finished!',
+          });
+          await generateSummary(snippetTimes, this.video.path, summaryPath);
+          ipcRenderer.send('stop-progress');
         }
       });
     },
@@ -375,14 +434,5 @@ export default {
   margin-bottom: 0;
   border-bottom-right-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
-}
-
-#video-btn {
-  background: var(--blue);
-  color: white;
-  cursor: pointer;
-  border-radius: 0.25rem;
-  padding: 0.5rem 1rem;
-  width: 100%;
 }
 </style>

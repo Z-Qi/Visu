@@ -1,5 +1,9 @@
 <template>
-  <b-card no-body :img-src="src" bg-variant="dark" text-variant="white">
+  <b-card 
+    :img-src="src" 
+    no-body 
+    bg-variant="dark" 
+    text-variant="white">
     <b-card-text>{{ timestamp.toFixed(3).replace('.', ':') }}</b-card-text>
   </b-card>
 </template>
@@ -8,6 +12,10 @@
 import { BCard, BCardText } from 'bootstrap-vue';
 
 export default {
+  components: {
+    BCard,
+    BCardText
+  },
   props: {
     src: {
       type: String,
@@ -18,9 +26,5 @@ export default {
       default: 0
     }
   },
-  components: {
-    BCard,
-    BCardText
-  }
 };
 </script>
