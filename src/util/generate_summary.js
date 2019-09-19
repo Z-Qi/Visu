@@ -16,7 +16,7 @@ export function generateSummary(snippets, inputVideo, outputVideo) {
 
   let filter = `"${trims}${concat}"`;
   return new Promise((resolve, reject) => {
-    exec(`ffmpeg -i ${inputVideo} -filter_complex ${filter} -map "[v]" -map "[a]" ${outputVideo} -y`, (err, out) => {
+    exec(`ffmpeg -i "${inputVideo}" -filter_complex ${filter} -map "[v]" -map "[a]" ${outputVideo} -y`, (err, out) => {
       if (err) {
         reject(err);
       } else {

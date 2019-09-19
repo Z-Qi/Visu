@@ -127,7 +127,7 @@
               class="mr-1 flex-grow-1"
               variant="dark"
               @click="generateSummaryDialog"
-              v-text="'Generate Summary'"
+              v-text="'Save Summary'"
             />
             <b-button 
               :disabled="snippets.length < 2" 
@@ -203,19 +203,10 @@ export default {
       video: {},
       options: {
         autoplay: false,
-        controls: true,
+        controls: false,
         preload: 'auto',
         fluid: true,
         sources: [],
-        children: {
-          controlBar: {
-            children: {
-              playToggle: true,
-              volumeControl: true,
-              fullscreenToggle: true,
-            },
-          },
-        },
       },
       player: null,
       playing: false,
@@ -235,7 +226,7 @@ export default {
   watch: {
     playing(newValue, oldValues) {
       if (newValue) {
-        let index = this.currentSliderIndex;
+        let index = 0;
         let val = this.values[index];
 
         this.updateInterval = setInterval(() => {
@@ -247,8 +238,12 @@ export default {
     },
     options(newOptions, oldOptions) {
       this.player.src(newOptions.sources[0]);
+      console.log(newOptions.sources[0]);
       this.values = [0, 0];
       this.snippets = [];
+    },
+    snippets() {
+      this.$emit('snippets-changed', this.snippets);
     },
     values(newValues, oldValues) {
       if (newValues[0] > newValues[1]) {
@@ -363,7 +358,6 @@ export default {
         start: this.values[0],
         end: this.values[1],
       });
-      this.$emit('snippets-changed', this.snippets);
     },
     removeSnippet(index) {
       this.snippets.splice(index, 1);

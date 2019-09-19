@@ -1,11 +1,12 @@
 <template>
-  <b-container fluid>
+  <b-container class="h-100" fluid>
     <b-row align-v="stretch" no-gutters>
       <b-col cols="10" class="mr-4">
         <multiselect
           v-model="filter"
           :options="options"
           :multiple="true"
+          :max="colors.length - filterRows.length"
           :close-on-select="false"
           :searchable="false"
           :show-labels="false"
@@ -31,13 +32,7 @@
         >
           <span class="filter-badge" @click="() => navigateToRow(f)">
             Contains a
-            <span v-for="(val, j) in f.filter" :key="val">
-              <span>
-                <b>{{ val }}</b>
-              </span>
-              <span v-if="j < f.filter.length - 1">,&nbsp;</span>
-              <span v-if="j == f.filter.length - 2">and&nbsp;</span>
-            </span>
+            <b>{{f.filter}}</b>
           </span>
           <button type="button" class="ml-2 close" aria-label="Close" @click="removeFilter(i + 1)">
             <span aria-hidden="true">&times;</span>
@@ -393,18 +388,26 @@ export default {
     },
     addFilter(filter) {
       // todo: check for duplicate filters (order doesn't matter)
-      const filteredImages = this.images.filter(img => filter.every(val => img.objects.includes(val)));
-      if (filteredImages.length > 0) {
+      if (filter.length === 0) {
         this.filterRows.push({
           filter: filter,
-          images: filteredImages,
+          images: this.images,
           background: this.colors[this.filterRows.length],
         });
+      } else {
+        for (const f of filter) {
+          const filteredImages = this.images.filter(img => img.objects.includes(f));
+          this.filterRows.push({
+            filter: f,
+            images: filteredImages,
+            background: this.colors[this.filterRows.length],
+          });
+        }
       }
-      this.filter = [];
     },
     addNewFilter() {
       this.addFilter(this.filter);
+      this.filter = [];
       this.drawImages();
       this.drawOverview();
     },
