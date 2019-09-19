@@ -126,7 +126,7 @@ export default {
         const duration = endTime - startTime;
         const ffmpeg = spawn('sh', [
           '-c',
-          `ffmpeg -ss ${startTime} -i ${this.inputVideo.path} -t ${duration} -preset ultrafast ${clipFile} -n`,
+          `ffmpeg -ss ${startTime} -i "${this.inputVideo.path}" -t ${duration} -preset ultrafast ${clipFile} -n`,
         ]);
         ffmpeg.on('exit', () => {
           resolve(clipFile);

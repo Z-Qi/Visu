@@ -50,9 +50,6 @@ import { BContainer, BRow, BCol, BTabs, BTab, BButton, BFormFile, BSpinner } fro
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 
-import Splitpanes from 'splitpanes';
-import 'splitpanes/dist/splitpanes.css';
-
 import { detectObjects, detectObjectsInFrames } from '../feature_detection/yolo';
 import { extractKeyframes, getShotBoundaryInfo } from '../feature_detection/keyframes';
 import { getClusteredImages } from '../feature_detection/clustering';
@@ -74,7 +71,6 @@ export default {
     BTabs,
     BTab,
     BSpinner,
-    Splitpanes,
   },
   data() {
     return {
