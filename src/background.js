@@ -16,6 +16,7 @@ function createWindow() {
   window = new BrowserWindow({
     width: 1200,
     height: 800,
+    title: 'Visu',
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false,
@@ -88,6 +89,10 @@ function createWindow() {
   window.on('closed', () => {
     window = null;
   });
+
+  window.on('page-title-updated', (e) => {
+    e.preventDefault();
+  })
 }
 
 // Quit when all windows are closed.
