@@ -47,14 +47,7 @@ for i in range(N):
 mds = MDS(n_components=2, dissimilarity='precomputed', n_jobs=-1, max_iter=100)
 transformed = mds.fit_transform(distances)
 
-noise = np.random.rand(N, 2)
-transformed += noise
-
-
 output = []
-# min_factor = -5
-# max_factor = 5
-
 for i in range(N):
     output.append({
         'src': args.input_frames[i],

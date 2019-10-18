@@ -87,7 +87,7 @@ export default {
       await this.processVideo();
     },
     async processVideo() {
-      const extractedKeyframes = await extractKeyframes(this.video, 10);
+      const extractedKeyframes = await extractKeyframes(this.video, 5);
 
       const processedFrames = await detectObjectsInFrames(extractedKeyframes);
 
