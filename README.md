@@ -2,6 +2,7 @@
 Editing tool built with automatic video analysis and visualisations of video features.
 
 ## Project setup
+External dependencies this application requires: CUDA, OpenCV, FFmpeg 4+, [Hecate](https://github.com/yahoo/hecate)
 ```
 npm install
 ```
@@ -15,16 +16,3 @@ npm run electron:serve
 ```
 npm run electron:build
 ```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
